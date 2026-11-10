@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Panel — Familiares Q10 2027 — I.E. Liceo Mayor de Soledad</title>
+<link rel="icon" href="assets/escudo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  header{background:var(--verde-800);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  header .id{display:flex;align-items:center;gap:12px;}
+  header img{width:46px;height:46px;}
+  header b{font-size:15px;display:block;}
+  header span{font-size:12px;color:var(--dorado);font-weight:600;}
+  header .der{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  header button{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:12.5px;padding:8px 14px;border-radius:8px;cursor:pointer;}
+  .badge{display:inline-block;min-width:20px;padding:1px 6px;border-radius:999px;background:#b04343;color:#fff;font-size:11px;font-weight:800;margin-left:4px;}
+  .pill{font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.15);}
+  .pill.abierto{background:#2f9e5c;} .pill.cerrado{background:#b04343;}
+
+  nav{background:#fff;border-bottom:1px solid var(--crema-2);position:sticky;top:0;z-index:5;}
+  nav .in{max-width:1220px;margin:0 auto;display:flex;gap:4px;overflow-x:auto;padding:0 12px;}
+  nav button{background:none;border:none;border-bottom:3px solid transparent;padding:14px 14px 11px;font-size:13.5px;font-weight:700;color:var(--tinta-suave);cursor:pointer;white-space:nowrap;}
+  nav button.activo{color:var(--verde-800);border-bottom-color:var(--verde-800);}
+
+  main{max-width:1220px;margin:0 auto;padding:20px 16px 60px;}
+  h2{font-size:13px;letter-spacing:.04em;color:var(--marron);text-transform:uppercase;margin:0 0 14px;}
+  .caja{background:#fff;border-radius:14px;padding:18px 20px;margin-bottom:20px;box-shadow:0 6px 16px rgba(0,0,0,.06);}
+
+  .metricas{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px;}
+  .metrica{background:#fff;border-radius:14px;padding:16px;box-shadow:0 6px 16px rgba(0,0,0,.06);}
+  .metrica .n{font-size:28px;font-weight:800;color:var(--verde-800);}
+  .metrica .l{font-size:12px;color:var(--tinta-suave);font-weight:600;margin-top:2px;}
+  .metrica.alerta-m .n{color:#a02828;}
+
+  .filtros-res{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,0,0,.06);}
+  .filtros-res .lbl{font-size:12px;font-weight:800;color:var(--marron);text-transform:uppercase;letter-spacing:.05em;margin-right:4px;}
+  .filtros-res select{width:auto;padding:9px 12px;font-size:13.5px;border-radius:999px;font-weight:600;}
+  .filtros-res select.on{border-color:var(--verde-700);background:var(--verde-100);color:var(--verde-900);}
+  .chip{border:1.5px solid var(--crema-2);background:#fff;border-radius:999px;padding:9px 16px;font-weight:700;font-size:13.5px;cursor:pointer;color:var(--tinta-suave);}
+  .chip.activo{background:var(--verde-800);border-color:var(--verde-800);color:#fff;}
+  .ambito{margin-left:auto;font-size:12.5px;color:var(--tinta-suave);font-weight:600;}
+  .cabeza-res{display:grid;grid-template-columns:300px 1fr;gap:16px;margin-bottom:20px;align-items:stretch;}
+  .cabeza-res .metricas{margin:0;grid-template-columns:repeat(3,1fr);}
+  .anillo-card{background:#fff;border-radius:14px;box-shadow:0 6px 16px rgba(0,0,0,.06);padding:18px;display:flex;align-items:center;gap:16px;}
+  .anillo{flex:0 0 120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .4s;}
+  .anillo > div{width:90px;height:90px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .anillo b{font-size:26px;font-weight:800;color:var(--verde-800);line-height:1;}
+  .anillo span{font-size:10.5px;color:var(--tinta-suave);font-weight:700;text-transform:uppercase;margin-top:3px;}
+  .anillo-txt{font-size:13px;color:var(--tinta-suave);line-height:1.55;}
+  .anillo-txt b{display:block;font-size:15px;color:var(--tinta);}
+  .dos-col{display:grid;grid-template-columns:1fr 2fr;gap:16px;}
+  .dos-col.sin-jornada{grid-template-columns:1fr;}
+  .barra-bg i.bajo{background:linear-gradient(90deg,#b04343,#e08a6d);}
+  .barra-bg i.medio{background:linear-gradient(90deg,var(--marron),var(--dorado));}
+  .barra-bg i.alto{background:linear-gradient(90deg,var(--verde-800),#57b886);}
+  .mini{display:flex;align-items:center;gap:8px;} .mini .barra-bg{flex:1;height:8px;}
+  @media (max-width:900px){ .cabeza-res,.dos-col{grid-template-columns:1fr;} .cabeza-res .metricas{grid-template-columns:repeat(2,1fr);} .ambito{margin-left:0;width:100%;} }
+  .barra-fila{display:grid;grid-template-columns:110px 1fr 120px;gap:12px;align-items:center;margin-bottom:10px;font-size:13px;}
+  .barra-fila b{font-weight:700;}
+  .barra-bg{background:var(--crema-2);border-radius:8px;height:12px;overflow:hidden;}
+  .barra-bg i{display:block;height:100%;background:linear-gradient(90deg,var(--marron),var(--dorado));border-radius:8px;}
+  .barra-fila span{color:var(--tinta-suave);text-align:right;}
+  @media (max-width:560px){ .barra-fila{grid-template-columns:80px 1fr 90px;} }
+
+  .herramientas{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .herramientas select,.herramientas input{width:auto;padding:9px 12px;font-size:13.5px;}
+  .herramientas input[type=search]{flex:1;min-width:200px;}
+  .btn{padding:10px 16px;border-radius:9px;border:none;background:var(--verde-800);color:#fff;font-weight:600;font-size:13.5px;cursor:pointer;}
+  .btn:disabled{opacity:.6;}
+  .btn-grande{background:linear-gradient(90deg,var(--marron),var(--dorado));color:#241a08;font-weight:800;padding:11px 18px;}
+
+  .tabla-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--crema-2);}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;}
+  th{background:var(--crema-2);text-align:left;padding:10px 12px;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--tinta-suave);white-space:nowrap;}
+  td{padding:10px 12px;border-top:1px solid var(--crema-2);vertical-align:top;}
+  tr.clic{cursor:pointer;} tr.clic:hover td{background:var(--crema);}
+  td .s{font-size:12px;color:var(--tinta-suave);}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--verde-100);color:var(--verde-900);}
+  .tag.rojo{background:var(--rojo-100);color:#7a2323;}
+  .tag.acu{background:var(--verde-800);color:#fff;}
+  .pct{font-weight:700;}
+  .mas{text-align:center;margin-top:12px;}
+  .nota{font-size:12.5px;color:var(--tinta-suave);margin-top:8px;}
+
+  /* Ventana de detalle */
+  .modal-fondo{position:fixed;inset:0;background:rgba(10,30,20,.55);display:flex;align-items:flex-start;justify-content:center;padding:30px 14px;overflow-y:auto;z-index:20;}
+  .modal{background:var(--crema);border-radius:16px;max-width:760px;width:100%;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.35);}
+  .modal h3{margin:0 0 4px;font-size:19px;}
+  .modal .cerrar{float:right;background:none;border:none;font-size:24px;cursor:pointer;color:var(--tinta-suave);}
+  .fam-det{background:#fff;border-radius:12px;padding:14px 16px;margin-top:12px;border:1.5px solid var(--crema-2);}
+  .fam-det dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:6px 16px;margin:8px 0 0;font-size:13px;}
+  .fam-det dt{font-size:10.5px;font-weight:700;color:var(--marron);text-transform:uppercase;letter-spacing:.03em;}
+  .fam-det dd{margin:0 0 4px;}
+  .anular{margin-top:18px;padding-top:16px;border-top:1px solid var(--crema-2);}
+  .anular textarea{min-height:70px;font-size:14px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="id">
+    <img src="assets/escudo.png" alt="Escudo">
+    <div><b>Familiares Q10 2027 — Panel</b><span id="perfilNombre">…</span></div>
+  </div>
+  <div class="der">
+    <span class="pill" id="pillEstado">…</span>
+    <button id="btnActualizar">↻ Actualizar</button>
+    <button id="btnSalir">Salir</button>
+  </div>
+</header>
+<nav><div class="in" id="tabs">
+  <button data-tab="resumen" class="activo">Resumen</button>
+  <button data-tab="faltantes">Estudiantes sin actualización</button>
+  <button data-tab="registros" id="tabRegistros">Registros</button>
+  <button data-tab="novedades" id="tabNovedades">Novedades de documento <span class="badge oculto" id="badgeNov"></span></button>
+  <button data-tab="exportar" class="oculto" id="tabExportar">Exportar a Q10</button>
+</div></nav>
+
+<main>
+  <div class="alerta oculto" id="errGeneral"></div>
+  <p id="cargando" class="nota">Cargando información…</p>
+
+  <!-- RESUMEN -->
+  <section id="t-resumen" class="oculto">
+    <div class="filtros-res">
+      <span class="lbl">Ver:</span>
+      <button class="chip" id="rTodo">Todo el colegio</button>
+      <select id="rJornada" aria-label="Jornada"><option value="">Todas las jornadas</option></select>
+      <select id="rGrado" aria-label="Grado"><option value="">Todos los grados</option></select>
+      <select id="rCurso" aria-label="Curso"><option value="">Todos los cursos</option></select>
+      <span class="ambito" id="rAmbito"></span>
+    </div>
+    <div class="alerta aviso oculto" id="avisoNov"></div>
+    <div class="cabeza-res">
+      <div class="anillo-card">
+        <div class="anillo" id="anillo"><div><b id="anilloPct">0%</b><span>de avance</span></div></div>
+        <div class="anillo-txt" id="anilloTxt"></div>
+      </div>
+      <div class="metricas" id="metricas"></div>
+    </div>
+    <div class="dos-col">
+      <div class="caja" id="cajaJornada"><h2>Avance por jornada</h2><div id="porJornada"></div></div>
+      <div class="caja"><h2 id="tituloBarras">Avance por grado</h2><div id="porGrado"></div></div>
+    </div>
+    <div class="caja">
+      <h2>Detalle por curso</h2>
+      <div class="tabla-wrap"><table><thead><tr><th>Jornada</th><th>Grado</th><th>Curso</th><th>Estudiantes</th><th>Con registro</th><th>Faltan</th><th style="min-width:160px">Avance</th></tr></thead><tbody id="tablaGrupos"></tbody></table></div>
+      <p class="nota">Haga clic en un curso para ver los estudiantes que faltan.</p>
+    </div>
+    <div class="caja" id="cajaAlertas"><h2>Para revisar: estudiantes con 2 o más acudientes</h2><div id="alertas"></div></div>
+  </section>
+
+  <!-- FALTANTES -->
+  <section id="t-faltantes" class="oculto">
+    <div class="caja">
+      <h2>Reporte: estudiantes que aún no tienen actualización de familiares</h2>
+      <p class="nota" style="margin:0 0 12px">Aquí aparecen <b>solo los estudiantes que aún no tienen sus familiares registrados</b>. Filtre por jornada, grado y curso, descargue la lista en Excel y llame a las familias para invitarlas a registrarse en el formulario. El teléfono es el que tiene el SIMAT (no todos los estudiantes lo tienen). <b>Use estos datos solo para esta gestión y no los comparta.</b></p>
+      <div class="herramientas">
+        <select id="fJornada" aria-label="Jornada"><option value="">Todas las jornadas</option></select>
+        <select id="fGrado" aria-label="Grado"><option value="">Todos los grados</option></select>
+        <select id="fCurso" aria-label="Curso"><option value="">Todos los cursos</option></select>
+        <select id="fTel" aria-label="Teléfono"><option value="">Con y sin teléfono</option><option value="si">Solo con teléfono</option><option value="no">Solo sin teléfono</option></select>
+        <input type="search" id="fBuscar" placeholder="Buscar por nombre o documento">
+        <button class="btn btn-grande" id="btnExpFaltantes">⬇ Descargar reporte en Excel</button>
+      </div>
+      <p class="nota" id="faltCuenta"></p>
+      <div class="tabla-wrap"><table><thead><tr><th>Documento</th><th>Nombre</th><th>Jornada</th><th>Grado</th><th>Curso</th><th>Teléfono (SIMAT)</th></tr></thead><tbody id="tablaFaltantes"></tbody></table></div>
+      <div class="mas"><button class="btn-sec oculto" id="masFaltantes">Ver más</button></div>
+    </div>
+  </section>
+
+  <!-- REGISTROS -->
+  <section id="t-registros" class="oculto">
+    <div class="caja">
+      <h2>Registros recibidos</h2>
+      <div class="herramientas">
+        <select id="rEstado"><option value="Activo">Activos</option><option value="Anulado">Anulados</option><option value="">Todos</option></select>
+        <input type="search" id="rBuscar" placeholder="Código, documento o nombre (estudiante o familiar)">
+      </div>
+      <p class="nota" id="regCuenta"></p>
+      <div class="tabla-wrap"><table><thead><tr><th>Código</th><th>Fecha</th><th>Estudiante(s)</th><th>Familiares</th><th>Estado</th></tr></thead><tbody id="tablaRegistros"></tbody></table></div>
+      <div class="mas"><button class="btn-sec oculto" id="masRegistros">Ver más</button></div>
+    </div>
+  </section>
+
+  <!-- NOVEDADES -->
+  <section id="t-novedades" class="oculto">
+    <div class="caja">
+      <h2>Novedades de documento reportadas por los padres</h2>
+      <p class="nota" style="margin:0 0 12px">El padre no encontró a su hijo(a) por documento, lo encontró por nombre y reportó que el documento cambió. <b>El reporte para Q10 sigue saliendo con el documento que tiene el colegio.</b> Corrija el dato en el SIMAT y marque la novedad como revisada.</p>
+      <div class="herramientas">
+        <select id="nEstado"><option value="Pendiente">Pendientes</option><option value="Revisada">Revisadas</option><option value="">Todas</option></select>
+        <input type="search" id="nBuscar" placeholder="Buscar por estudiante o documento">
+        <button class="btn" id="btnExpNov">Descargar lista (.xlsx)</button>
+      </div>
+      <p class="nota" id="novCuenta"></p>
+      <div class="tabla-wrap"><table><thead><tr><th>Fecha</th><th>Estudiante</th><th>Documento en el colegio</th><th>Documento actual reportado</th><th>Reportado por</th><th>Estado</th></tr></thead><tbody id="tablaNov"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- EXPORTAR -->
+  <section id="t-exportar" class="oculto">
+    <div class="caja">
+      <h2>Descargar el Formato Q10</h2>
+      <p style="font-size:14px;line-height:1.6;margin:0 0 6px">Genera el archivo <b>«5. Formato Acudientes - Codeudores»</b> <b>sobre la plantilla original que envió Q10</b>: mismos colores, notas, encabezados, listas y hoja «Acudientes». Los datos se escriben desde la fila 4, una fila por cada pareja familiar–estudiante, en el orden exacto de sus 21 columnas.</p>
+      <ul style="font-size:13.5px;line-height:1.7;color:var(--tinta-suave);margin:0 0 16px;padding-left:18px">
+        <li>Solo incluye registros <b>activos</b> (los anulados no salen).</li>
+        <li>Si un familiar se registró dos veces para el mismo estudiante, sale solo su registro <b>más reciente</b>.</li>
+        <li>Para enviar solo lo nuevo, elija la fecha desde la cual quiere exportar.</li>
+      </ul>
+      <div class="herramientas">
+        <label for="eDesde" style="margin:0">Registros desde (opcional):</label>
+        <input type="date" id="eDesde">
+        <button class="btn" id="btnExportar">Descargar Formato Q10 (.xlsx)</button>
+      </div>
+      <div class="alerta info oculto" id="expMsg"></div>
+    </div>
+  </section>
+</main>
+
+<div class="modal-fondo oculto" id="modal"><div class="modal" id="modalCuerpo"></div></div>
+
+<script src="config.js"></script>
+<script>
+const token = sessionStorage.getItem("fq10_token");
+if (!token) location.replace("login.html");
+
+const ETQ = { primerNombre:"Primer nombre", segundoNombre:"Segundo nombre", primerApellido:"Primer apellido", segundoApellido:"Segundo apellido",
+  tipoDocumento:"Tipo de documento", numeroDocumento:"Número de documento", municipioExpedicion:"Municipio de expedición", genero:"Género",
+  fechaNacimiento:"Fecha de nacimiento", municipioNacimiento:"Municipio de nacimiento", telefono:"Teléfono", celular:"Celular", email:"Email",
+  direccion:"Dirección", municipioDireccion:"Municipio de residencia", barrio:"Barrio", tipoSangre:"Tipo de sangre", estadoCivil:"Estado civil",
+  parentesco:"Parentesco", acudiente:"Acudiente" };
+
+let D = null, mapaEst = {}, regsPorEst = {}, limFalt = 200, limReg = 100;
+const $ = id => document.getElementById(id);
+const puede = p => D && D.perfil.permisos.includes(p);
+const cmp = (a, b) => String(a).localeCompare(String(b), "es", { numeric: true });
+/* Orden académico de los grados (Transición, Primero… Undécimo, o 0, 1… 11) */
+const GRADOS = ["prejardin","jardin","transicion","primero","segundo","tercero","cuarto","quinto","sexto","septimo","octavo","noveno","decimo","undecimo"];
+function rangoGrado(g){
+  const t = String(g).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  const i = GRADOS.findIndex(x => t.startsWith(x)); if (i >= 0) return i;
+  const n = parseInt(t, 10); return isNaN(n) ? 99 : 2 + n;
+}
+/* En el SIMAT el mismo curso (ej. 601) existe en mañana y en tarde: se identifica por curso + jornada */
+const cursoEt = e => e.cu + " · " + e.j;
+const cmpGrado = (a, b) => (rangoGrado(a) - rangoGrado(b)) || cmp(a, b);
+const nombreFam = f => [f.primerNombre, f.segundoNombre, f.primerApellido, f.segundoApellido].filter(Boolean).join(" ");
+const fechaCorta = s => String(s).replace(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}:\d{2}).*/, "$3/$2/$1 $4");
+
+function manejarError(e){
+  if (/sesión expiró/i.test(e.message)) { sessionStorage.removeItem("fq10_token"); location.replace("login.html"); return; }
+  $("errGeneral").textContent = e.message; $("errGeneral").classList.remove("oculto");
+}
+
+async function cargar(){
+  $("errGeneral").classList.add("oculto");
+  $("btnActualizar").disabled = true;
+  try {
+    D = await api("panel", { token });
+    mapaEst = {}; D.estudiantes.forEach(e => mapaEst[e.d] = e);
+    regsPorEst = {};
+    D.registros.filter(r => r.e === "Activo").forEach(r => r.est.forEach(d => (regsPorEst[d] = regsPorEst[d] || []).push(r)));
+    $("perfilNombre").textContent = D.perfil.nombre;
+    const pe = $("pillEstado");
+    pe.className = "pill " + (D.config.abierto ? "abierto" : "cerrado");
+    pe.textContent = D.config.abierto ? "Registro abierto" + (D.config.cierre ? " hasta " + D.config.cierre : "") : "Registro cerrado";
+    $("tabExportar").classList.toggle("oculto", !puede("exportar"));
+    $("tabRegistros").classList.toggle("oculto", !puede("verRegistros"));
+    $("tabNovedades").classList.toggle("oculto", !D.novedades);
+    $("cajaAlertas").classList.toggle("oculto", !puede("verRegistros"));
+    $("cargando").classList.add("oculto");
+    llenarFiltros(); pintarResumen(); pintarFaltantes(); pintarRegistros(); pintarNovedades();
+    // Los docentes entran directo al reporte de estudiantes sin actualización
+    if (!document.querySelector("main > section:not(.oculto)")) mostrarTab(D.perfil.area === "docentes" ? "faltantes" : "resumen");
+  } catch (e) { $("cargando").classList.add("oculto"); manejarError(e); }
+  finally { $("btnActualizar").disabled = false; }
+}
+
+/* ---------- pestañas ---------- */
+function mostrarTab(t){
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("activo", b.dataset.tab === t));
+  document.querySelectorAll("main > section").forEach(s => s.classList.toggle("oculto", s.id !== "t-" + t));
+}
+document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => mostrarTab(b.dataset.tab));
+
+/* ---------- resumen ---------- */
+/* Filtros del resumen: Todo / Jornada / Grado / Curso */
+const nivel = p => p < 30 ? "bajo" : p < 70 ? "medio" : "alto";
+function barraHTML(nombre, c, t){
+  const p = t ? Math.round(c * 100 / t) : 0;
+  return '<div class="barra-fila"><b>' + esc(nombre) + '</b><div class="barra-bg"><i class="' + nivel(p) + '" style="width:' + p + '%"></i></div><span>' + c + ' de ' + t + ' · <b>' + p + '%</b></span></div>';
+}
+function llenarFiltrosResumen(){
+  const j = $("rJornada").value, g = $("rGrado").value, cu = $("rCurso").value;
+  const opciones = (id, vals, todos, orden) => {
+    const s = $(id), v = s.value; const lista = [...new Set(vals.filter(Boolean))].sort(orden);
+    s.innerHTML = '<option value="">' + todos + '</option>' + lista.map(x => '<option>' + esc(x) + '</option>').join("");
+    s.value = lista.includes(v) ? v : ""; s.classList.toggle("on", !!s.value);
+  };
+  opciones("rJornada", D.estudiantes.map(e => e.j), "Todas las jornadas", cmp);
+  opciones("rGrado", D.estudiantes.filter(e => !$("rJornada").value || e.j === $("rJornada").value).map(e => e.g), "Todos los grados", cmpGrado);
+  opciones("rCurso", D.estudiantes.filter(e => (!$("rJornada").value || e.j === $("rJornada").value) && (!$("rGrado").value || e.g === $("rGrado").value)).map(cursoEt), "Todos los cursos", cmp);
+  $("rTodo").classList.toggle("activo", !$("rJornada").value && !$("rGrado").value && !$("rCurso").value);
+}
+["rJornada", "rGrado", "rCurso"].forEach(id => $(id).onchange = () => { pintarResumen(); });
+$("rTodo").onclick = () => { $("rJornada").value = $("rGrado").value = $("rCurso").value = ""; pintarResumen(); };
+
+function pintarResumen(){
+  llenarFiltrosResumen();
+  const fj = $("rJornada").value, fg = $("rGrado").value, fc = $("rCurso").value;
+  const pendNov = (D.novedades || []).filter(n => n.estado !== "Revisada").length;
+  $("avisoNov").innerHTML = pendNov ? "⚠ Hay <b>" + pendNov + "</b> novedad(es) de documento reportadas por los padres pendientes de revisar. <a href=\"#\" id=\"irNov\">Ver novedades</a>" : "";
+  $("avisoNov").classList.toggle("oculto", !pendNov);
+  if (pendNov) $("irNov").onclick = ev => { ev.preventDefault(); mostrarTab("novedades"); };
+  const est = D.estudiantes.filter(e => (!fj || e.j === fj) && (!fg || e.g === fg) && (!fc || cursoEt(e) === fc));
+  const docs = new Set(est.map(e => e.d));
+  const total = est.length;
+  const con = est.filter(e => regsPorEst[e.d]).length;
+  const activos = D.registros.filter(r => r.e === "Activo" && r.est.some(d => docs.has(d)));
+  const famUnicos = new Set(); activos.forEach(r => r.fams.forEach(f => famUnicos.add(f.numeroDocumento || nombreFam(f))));
+  const acud = new Set(); activos.forEach(r => r.fams.forEach(f => { if (f.acudiente === "SI") r.est.forEach(d => { if (docs.has(d)) acud.add(d); }); }));
+  const alertas = calcularAlertas().filter(a => docs.has(a.doc));
+  const pct = total ? Math.round(con * 100 / total) : 0;
+  const ambito = [fj && "Jornada " + fj, fg && "Grado " + fg, fc && "Curso " + fc].filter(Boolean).join(" · ") || "Todo el colegio";
+  $("rAmbito").textContent = "Mostrando: " + ambito;
+
+  const color = pct < 30 ? "#c25b4f" : pct < 70 ? "#c99a4a" : "#12824c";
+  $("anillo").style.background = "conic-gradient(" + color + " " + pct + "%, var(--crema-2) 0)";
+  $("anilloPct").textContent = pct + "%"; $("anilloPct").style.color = color;
+  $("anilloTxt").innerHTML = "<b>" + esc(ambito) + "</b>" + con.toLocaleString("es-CO") + " de " + total.toLocaleString("es-CO") + " estudiantes ya tienen familiares registrados.";
+
+  $("metricas").innerHTML = [
+    [total.toLocaleString("es-CO"), "Estudiantes"],
+    [con.toLocaleString("es-CO"), "Con familiares registrados"],
+    [(total - con).toLocaleString("es-CO"), "Sin registro todavía", (total - con) ? "" : ""],
+    [famUnicos.size.toLocaleString("es-CO"), "Familiares registrados"],
+    [acud.size.toLocaleString("es-CO"), "Con acudiente definido"],
+    [alertas.length, "Con 2 o más acudientes", alertas.length ? "alerta-m" : ""]
+  ].map(m => '<div class="metrica ' + (m[2] || "") + '"><div class="n">' + m[0] + '</div><div class="l">' + m[1] + '</div></div>').join("");
+
+  // Por jornada (solo si no se filtró una jornada)
+  $("cajaJornada").classList.toggle("oculto", !!fj);
+  $("cajaJornada").parentElement.classList.toggle("sin-jornada", !!fj);
+  if (!fj) {
+    const jor = {}; est.forEach(e => { const x = jor[e.j] = jor[e.j] || { t: 0, c: 0 }; x.t++; if (regsPorEst[e.d]) x.c++; });
+    $("porJornada").innerHTML = Object.keys(jor).sort(cmp).map(k => barraHTML(k || "(sin jornada)", jor[k].c, jor[k].t)).join("") || '<p class="nota">Sin datos.</p>';
+  }
+  // Por grado, o por curso si hay un grado elegido
+  const porCurso = !!fg || !!fc;
+  $("tituloBarras").textContent = porCurso ? "Avance por curso" + (fg ? " — grado " + fg : "") : "Avance por grado";
+  const grupos = {};
+  est.forEach(e => { const k = porCurso ? cursoEt(e) : e.g; const x = grupos[k] = grupos[k] || { t: 0, c: 0 }; x.t++; if (regsPorEst[e.d]) x.c++; });
+  $("porGrado").innerHTML = Object.keys(grupos).sort(porCurso ? cmp : cmpGrado).map(k => barraHTML(porCurso ? "Curso " + k : "Grado " + k, grupos[k].c, grupos[k].t)).join("") ||
+    '<p class="nota">Aún no hay estudiantes en la base. Péguelos en la hoja «Estudiantes» del Google Sheet.</p>';
+
+  const cursos = {};
+  est.forEach(e => { const k = e.j + "|" + e.g + "|" + e.cu; const g = cursos[k] = cursos[k] || { j: e.j, g: e.g, cu: e.cu, t: 0, c: 0 }; g.t++; if (regsPorEst[e.d]) g.c++; });
+  $("tablaGrupos").innerHTML = Object.values(cursos).sort((a, b) => cmp(a.j, b.j) || cmpGrado(a.g, b.g) || cmp(a.cu, b.cu)).map(g => {
+    const p = Math.round(g.c * 100 / g.t);
+    return '<tr class="clic" data-j="' + esc(g.j) + '" data-g="' + esc(g.g) + '" data-cu="' + esc(g.cu) + '"><td>' + esc(g.j) + '</td><td>' + esc(g.g) + '</td><td><b>' + esc(g.cu) + '</b></td><td>' + g.t + '</td><td>' + g.c + '</td><td>' + (g.t - g.c) + '</td>' +
+      '<td><div class="mini"><div class="barra-bg"><i class="' + nivel(p) + '" style="width:' + p + '%"></i></div><b class="pct">' + p + '%</b></div></td></tr>';
+  }).join("");
+  $("tablaGrupos").querySelectorAll("tr").forEach(tr => tr.onclick = () => {
+    $("fJornada").value = tr.dataset.j; $("fGrado").value = tr.dataset.g; $("fCurso").value = tr.dataset.cu + " · " + tr.dataset.j; $("fBuscar").value = "";
+    limFalt = 200; pintarFaltantes(); mostrarTab("faltantes");
+  });
+
+  $("alertas").innerHTML = alertas.length ? '<div class="tabla-wrap"><table><thead><tr><th>Estudiante</th><th>Acudientes registrados</th></tr></thead><tbody>' +
+    alertas.map(a => '<tr><td><b>' + esc(a.est.n || a.doc) + '</b><div class="s">Doc. ' + esc(a.doc) + ' · Grado ' + esc(a.est.g || "") + ' · Curso ' + esc(a.est.cu || "") + '</div></td><td>' +
+      a.acud.map(x => esc(x.nombre) + ' <span class="s">(' + esc(x.parentesco) + ', registro ' + esc(x.codigo) + ')</span>').join("<br>") + '</td></tr>').join("") +
+    '</tbody></table></div><p class="nota">Puede ser correcto (la familia marcó a dos acudientes) o pasar porque la mamá y el papá llenaron el formulario por separado. Si no corresponde, confirme con la familia y anule el registro que sobra.</p>'
+    : '<p class="nota">Sin novedades. ✓</p>';
+}
+
+function calcularAlertas(){
+  const out = [];
+  Object.keys(regsPorEst).forEach(doc => {
+    const acud = new Map();
+    regsPorEst[doc].forEach(r => r.fams.filter(f => f.acudiente === "SI").forEach(f => acud.set(f.numeroDocumento || nombreFam(f), { nombre: nombreFam(f), parentesco: f.parentesco, codigo: r.c })));
+    if (acud.size > 1) out.push({ doc, est: mapaEst[doc] || {}, acud: Array.from(acud.values()) });
+  });
+  return out;
+}
+
+/* ---------- faltantes ---------- */
+function llenarFiltros(){
+  const set = (id, vals, todos, orden) => { const s = $(id), v = s.value; const l = [...new Set(vals.filter(Boolean))].sort(orden);
+    s.innerHTML = '<option value="">' + todos + '</option>' + l.map(x => '<option>' + esc(x) + '</option>').join(""); s.value = l.includes(v) ? v : ""; };
+  set("fJornada", D.estudiantes.map(e => e.j), "Todas las jornadas", cmp);
+  set("fGrado", D.estudiantes.filter(e => !$("fJornada").value || e.j === $("fJornada").value).map(e => e.g), "Todos los grados", cmpGrado);
+  set("fCurso", D.estudiantes.filter(e => (!$("fJornada").value || e.j === $("fJornada").value) && (!$("fGrado").value || e.g === $("fGrado").value) && e.cu).map(cursoEt), "Todos los cursos", cmp);
+}
+function faltantesFiltrados(){
+  const j = $("fJornada").value, g = $("fGrado").value, cu = $("fCurso").value, tel = $("fTel").value, q = $("fBuscar").value.trim().toLowerCase();
+  return D.estudiantes.filter(e => !regsPorEst[e.d] && (!j || e.j === j) && (!g || e.g === g) && (!cu || cursoEt(e) === cu) &&
+    (!tel || (tel === "si" ? !!e.t : !e.t)) &&
+    (!q || e.d.toLowerCase().includes(q) || e.n.toLowerCase().includes(q))).sort((a, b) => cmp(a.j, b.j) || cmpGrado(a.g, b.g) || cmp(a.cu, b.cu) || cmp(a.n, b.n));
+}
+function filtroTexto(){
+  return [$("fJornada").value && "Jornada " + $("fJornada").value, $("fGrado").value && "Grado " + $("fGrado").value, $("fCurso").value && "Curso " + $("fCurso").value,
+    $("fTel").value === "si" ? "Con teléfono" : $("fTel").value === "no" ? "Sin teléfono" : ""].filter(Boolean).join(" · ") || "Todo el colegio";
+}
+function pintarFaltantes(){
+  if (!D) return;
+  const lista = faltantesFiltrados(), conTel = lista.filter(e => e.t).length;
+  $("faltCuenta").innerHTML = "<b>" + lista.length.toLocaleString("es-CO") + "</b> estudiantes sin actualización · " + esc(filtroTexto()) + " · " + conTel.toLocaleString("es-CO") + " con teléfono en el SIMAT.";
+  $("tablaFaltantes").innerHTML = lista.slice(0, limFalt).map(e => '<tr><td>' + esc(e.d) + '</td><td>' + esc(e.n) + '</td><td>' + esc(e.j) + '</td><td>' + esc(e.g) + '</td><td>' + esc(e.cu) + '</td><td>' +
+    (e.t ? e.t.split(" / ").map(n => '<a href="tel:' + esc(n) + '">' + esc(n) + '</a>').join(" / ") : '<span class="s">—</span>') + '</td></tr>').join("") ||
+    '<tr><td colspan="6" class="s">No hay estudiantes pendientes con este filtro. ✓</td></tr>';
+  $("masFaltantes").classList.toggle("oculto", lista.length <= limFalt);
+}
+["fJornada", "fGrado", "fCurso"].forEach(id => $(id).onchange = () => { limFalt = 200; llenarFiltros(); pintarFaltantes(); });
+$("fTel").onchange = () => { limFalt = 200; pintarFaltantes(); };
+$("fBuscar").oninput = () => { limFalt = 200; pintarFaltantes(); };
+$("masFaltantes").onclick = () => { limFalt += 200; pintarFaltantes(); };
+$("btnExpFaltantes").onclick = () => {
+  const lista = faltantesFiltrados();
+  const hoy = new Date().toISOString().slice(0, 10);
+  const aoa = [
+    ["Estudiantes sin actualización de familiares 2027 — I.E. Liceo Mayor de Soledad"],
+    ["Filtro: " + filtroTexto() + " · Descargado el " + hoy.split("-").reverse().join("/") + " · " + lista.length + " estudiantes"],
+    ["Uso exclusivo para la gestión de actualización de datos. No compartir."],
+    [],
+    ["Documento", "Nombre completo", "Jornada", "Grado", "Curso", "Teléfono (SIMAT)", "Resultado de la llamada", "Fecha de la llamada"]
+  ].concat(lista.map(e => [e.d, e.n, e.j, e.g, e.cu, e.t, "", ""]));
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"] = [{ wch: 14 }, { wch: 42 }, { wch: 10 }, { wch: 11 }, { wch: 8 }, { wch: 16 }, { wch: 34 }, { wch: 16 }];
+  ws["!autofilter"] = { ref: "A5:H" + (5 + lista.length) };
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Sin actualización");
+  const nombre = "Sin actualización familiares - " + filtroTexto().replace(/[·]/g, "-").replace(/\s+/g, " ") + " - " + hoy + ".xlsx";
+  XLSX.writeFile(wb, nombre);
+  api("registrarDescarga", { token, detalle: filtroTexto() + " · " + lista.length + " filas" }).catch(() => {});
+};
+
+/* ---------- registros ---------- */
+function registrosFiltrados(){
+  const est = $("rEstado").value, q = $("rBuscar").value.trim().toLowerCase();
+  return D.registros.filter(r => (!est || r.e === est) && (!q ||
+    r.c.toLowerCase().includes(q) ||
+    r.est.some(d => d.includes(q) || ((mapaEst[d] || {}).n || "").toLowerCase().includes(q)) ||
+    r.fams.some(f => (f.numeroDocumento || "").includes(q) || nombreFam(f).toLowerCase().includes(q))
+  )).sort((a, b) => a.f < b.f ? 1 : -1);
+}
+/* ---------- novedades de documento ---------- */
+function novedadesFiltradas(){
+  const e = $("nEstado").value, q = $("nBuscar").value.trim().toLowerCase();
+  return (D.novedades || []).filter(n => (!e || n.estado === e) && (!q || n.n.toLowerCase().includes(q) || n.doc.toLowerCase().includes(q) || n.num.toLowerCase().includes(q)))
+    .sort((a, b) => a.f < b.f ? 1 : -1);
+}
+function pintarNovedades(){
+  if (!D.novedades) return;
+  const pend = (D.novedades || []).filter(n => n.estado !== "Revisada").length;
+  $("badgeNov").textContent = pend; $("badgeNov").classList.toggle("oculto", !pend);
+  const lista = novedadesFiltradas();
+  $("novCuenta").textContent = lista.length + " novedades con este filtro.";
+  $("tablaNov").innerHTML = lista.map(n => '<tr><td>' + esc(fechaCorta(n.f)) + '<div class="s">Registro ' + esc(n.c) + '</div></td>' +
+    '<td><b>' + esc(n.n) + '</b><div class="s">' + esc(n.j) + ' · Grado ' + esc(n.g) + ' · Curso ' + esc(n.cu) + '</div></td>' +
+    '<td>' + esc(n.doc) + '</td><td><b>' + esc(n.num) + '</b><div class="s">' + esc(n.tipo) + '</div></td>' +
+    '<td>' + esc(n.por) + (n.cel ? '<div class="s">' + esc(n.cel) + '</div>' : '') + '</td><td>' +
+    (n.estado === "Revisada" ? '<span class="tag">Revisada</span><div class="s">' + esc(n.revisadoPor) + ' · ' + esc(fechaCorta(n.fechaRev)) + '</div>'
+      : '<span class="tag rojo">Pendiente</span>' + (puede("novedades") ? '<div style="margin-top:6px"><button class="btn-sec verde" style="padding:6px 10px;font-size:12px" data-rev="' + n.fila + '">Marcar revisada</button></div>' : '')) +
+    '</td></tr>').join("") || '<tr><td colspan="6" class="s">No hay novedades con este filtro. ✓</td></tr>';
+  $("tablaNov").querySelectorAll("[data-rev]").forEach(b => b.onclick = async () => {
+    const n = D.novedades.find(x => x.fila === +b.dataset.rev);
+    b.disabled = true; b.textContent = "Guardando…";
+    try { await api("marcarNovedad", { token, fila: n.fila, codigo: n.c, doc: n.doc }); await cargar(); }
+    catch (e) { manejarError(e); b.disabled = false; b.textContent = "Marcar revisada"; }
+  });
+}
+$("nEstado").onchange = pintarNovedades;
+$("nBuscar").oninput = pintarNovedades;
+$("btnExpNov").onclick = () => {
+  const filas = novedadesFiltradas().map(n => [n.f, n.c, n.n, n.j, n.g, n.cu, n.doc, n.tipo, n.num, n.por, n.cel, n.estado]);
+  const ws = XLSX.utils.aoa_to_sheet([["Fecha", "Código registro", "Estudiante", "Jornada", "Grado", "Curso", "Documento en el colegio", "Tipo documento actual", "Número documento actual", "Reportado por", "Celular", "Estado"]].concat(filas));
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Novedades");
+  XLSX.writeFile(wb, "Novedades de documento " + new Date().toISOString().slice(0, 10) + ".xlsx");
+};
+
+function pintarRegistros(){
+  if (!D) return;
+  const lista = registrosFiltrados();
+  $("regCuenta").textContent = lista.length.toLocaleString("es-CO") + " registros.";
+  $("tablaRegistros").innerHTML = lista.slice(0, limReg).map(r => '<tr class="clic" data-c="' + esc(r.c) + '"><td><b>' + esc(r.c) + '</b></td><td>' + esc(fechaCorta(r.f)) + '</td><td>' +
+    r.est.map(d => { const e = mapaEst[d] || {}; return esc(e.n || d) + ' <span class="s">(Grado ' + esc(e.g || "") + ' · ' + esc(e.cu || "") + ')</span>'; }).join("<br>") + '</td><td>' +
+    r.fams.map(f => esc(nombreFam(f)) + ' <span class="s">' + esc(f.parentesco) + '</span>' + (f.acudiente === "SI" ? ' <span class="tag acu">Acudiente</span>' : '')).join("<br>") + '</td><td>' +
+    (r.e === "Activo" ? '<span class="tag">Activo</span>' : '<span class="tag rojo">Anulado</span>') + '</td></tr>').join("") ||
+    '<tr><td colspan="5" class="s">No hay registros con este filtro.</td></tr>';
+  $("masRegistros").classList.toggle("oculto", lista.length <= limReg);
+  $("tablaRegistros").querySelectorAll("tr.clic").forEach(tr => tr.onclick = () => abrirDetalle(tr.dataset.c));
+}
+$("rEstado").onchange = () => { limReg = 100; pintarRegistros(); };
+$("rBuscar").oninput = () => { limReg = 100; pintarRegistros(); };
+$("masRegistros").onclick = () => { limReg += 100; pintarRegistros(); };
+
+function abrirDetalle(codigo){
+  const r = D.registros.find(x => x.c === codigo); if (!r) return;
+  let h = '<button class="cerrar" aria-label="Cerrar" id="mCerrar">×</button><h3>Registro ' + esc(r.c) + '</h3>' +
+    '<p class="nota">Recibido el ' + esc(fechaCorta(r.f)) + ' · ' + (r.e === "Activo" ? '<span class="tag">Activo</span>' : '<span class="tag rojo">Anulado</span>') + '</p>';
+  if (r.e === "Anulado") h += '<div class="alerta">Anulado por ' + esc(r.anuladoPor) + ' el ' + esc(fechaCorta(r.fechaAnulacion)) + '. Motivo: ' + esc(r.motivo) + '</div>';
+  h += '<div class="fam-det"><b>Estudiante(s)</b><dl>' + r.est.map(d => { const e = mapaEst[d] || {}; return '<div><dt>Doc. ' + esc(d) + '</dt><dd>' + esc(e.n || "(no está en la base)") + '<br><span class="s">' + esc(e.j || "") + ' · Grado ' + esc(e.g || "") + ' · Curso ' + esc(e.cu || "") + '</span></dd></div>'; }).join("") + '</dl></div>';
+  r.fams.forEach((f, i) => {
+    h += '<div class="fam-det"><b>Familiar ' + (i + 1) + ': ' + esc(nombreFam(f)) + '</b>' + (f.acudiente === "SI" ? ' <span class="tag acu">Acudiente</span>' : '') + '<dl>' +
+      Object.keys(ETQ).filter(k => f[k] !== undefined && f[k] !== "" && !["primerNombre", "segundoNombre", "primerApellido", "segundoApellido"].includes(k))
+        .map(k => '<div><dt>' + ETQ[k] + '</dt><dd>' + esc(f[k]) + '</dd></div>').join("") + '</dl></div>';
+  });
+  if (!puede("datosPersonales")) h += '<p class="nota">Su perfil ve solo nombres y parentesco. Los datos de contacto los ven Administración y Secretaría Académica.</p>';
+  if (puede("anular") && r.e === "Activo") {
+    h += '<div class="anular"><b style="font-size:14px">Anular este registro</b><p class="nota">Úselo si el registro está duplicado o tiene datos errados (la familia puede registrarse de nuevo). El registro no se borra: queda marcado como anulado y no sale en la exportación a Q10.</p>' +
+      '<label for="mMotivo">Motivo</label><textarea id="mMotivo" maxlength="200"></textarea><div class="alerta oculto" id="mErr"></div>' +
+      '<button class="btn-sec peligro" id="mAnular" style="margin-top:10px">Anular registro</button></div>';
+  }
+  $("modalCuerpo").innerHTML = h;
+  $("modal").classList.remove("oculto");
+  $("mCerrar").onclick = cerrarModal;
+  if ($("mAnular")) $("mAnular").onclick = async () => {
+    const motivo = $("mMotivo").value.trim();
+    if (!motivo) { $("mErr").textContent = "Escriba el motivo."; $("mErr").classList.remove("oculto"); return; }
+    if (!confirmarDoble()) return;
+    $("mAnular").disabled = true; $("mAnular").textContent = "Anulando…";
+    try { await api("anularRegistro", { token, codigo: r.c, motivo }); cerrarModal(); await cargar(); }
+    catch (e) { $("mErr").textContent = e.message; $("mErr").classList.remove("oculto"); $("mAnular").disabled = false; $("mAnular").textContent = "Anular registro"; }
+  };
+}
+/* Pide pulsar dos veces para evitar anulaciones por accidente (sin ventanas emergentes del navegador). */
+let armado = false;
+function confirmarDoble(){
+  if (armado) { armado = false; return true; }
+  armado = true; $("mAnular").textContent = "Pulse de nuevo para confirmar";
+  setTimeout(() => { armado = false; if ($("mAnular") && !$("mAnular").disabled) $("mAnular").textContent = "Anular registro"; }, 4000);
+  return false;
+}
+function cerrarModal(){ $("modal").classList.add("oculto"); armado = false; }
+$("modal").onclick = e => { if (e.target.id === "modal") cerrarModal(); };
+document.addEventListener("keydown", e => { if (e.key === "Escape") cerrarModal(); });
+
+/* ---------- exportar a Q10: se llena la plantilla original (assets/plantilla-q10.xlsx) ---------- */
+async function leerPlantilla(){
+  if (window.__PLANTILLA_Q10) return Uint8Array.from(atob(window.__PLANTILLA_Q10), c => c.charCodeAt(0));
+  const r = await fetch("assets/plantilla-q10.xlsx", { cache: "no-store" });
+  if (!r.ok) throw new Error("No se encontró la plantilla de Q10 (assets/plantilla-q10.xlsx).");
+  return r.arrayBuffer();
+}
+
+/** Escribe las filas desde la fila 4 de la hoja «Acudientes», sin tocar el resto del archivo. */
+async function llenarPlantilla(filas){
+  if (!window.JSZip) throw new Error("No se pudo cargar el componente para generar Excel. Revise su conexión e intente de nuevo.");
+  const zip = await JSZip.loadAsync(await leerPlantilla());
+  const ruta = "xl/worksheets/sheet1.xml";
+  const doc = new DOMParser().parseFromString(await zip.file(ruta).async("string"), "application/xml");
+  const NS = doc.documentElement.namespaceURI;
+  const sd = doc.getElementsByTagNameNS(NS, "sheetData")[0];
+  const porFila = {};
+  Array.from(sd.getElementsByTagNameNS(NS, "row")).forEach(r => porFila[+r.getAttribute("r")] = r);
+  const numCol = ref => { let n = 0; for (const ch of ref.replace(/\d+/g, "")) n = n * 26 + ch.charCodeAt(0) - 64; return n; };
+  const LETRAS = "ABCDEFGHIJKLMNOPQRSTU".split("");
+  filas.forEach((fila, i) => {
+    const r = 4 + i;
+    let row = porFila[r];
+    if (!row) { row = doc.createElementNS(NS, "row"); row.setAttribute("r", r); sd.appendChild(row); porFila[r] = row; }
+    fila.forEach((valor, j) => {
+      const v = String(valor == null ? "" : valor);
+      if (!v) return;
+      const ref = LETRAS[j] + r;
+      const celdas = Array.from(row.getElementsByTagNameNS(NS, "c"));
+      const vieja = celdas.find(c => c.getAttribute("r") === ref);
+      const c = doc.createElementNS(NS, "c");
+      c.setAttribute("r", ref);
+      c.setAttribute("s", vieja && vieja.getAttribute("s") ? vieja.getAttribute("s") : "18"); // estilo de la plantilla
+      c.setAttribute("t", "inlineStr");                                                    // siempre texto (conserva ceros)
+      const is = doc.createElementNS(NS, "is"), t = doc.createElementNS(NS, "t");
+      t.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space", "preserve");
+      t.textContent = v; is.appendChild(t); c.appendChild(is);
+      if (vieja) row.replaceChild(c, vieja);
+      else { const sig = celdas.find(x => numCol(x.getAttribute("r")) > j + 1); sig ? row.insertBefore(c, sig) : row.appendChild(c); }
+    });
+  });
+  const dim = doc.getElementsByTagNameNS(NS, "dimension")[0];
+  if (dim) dim.setAttribute("ref", "A1:ED" + Math.max(1000, 3 + filas.length));
+  let xml = new XMLSerializer().serializeToString(doc);
+  if (!/^<\?xml/.test(xml)) xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + xml;
+  zip.file(ruta, xml);
+  return zip.generateAsync({ type: "blob", compression: "DEFLATE", mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+}
+
+function descargar(blob, nombre){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = nombre;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+
+$("btnExportar").onclick = async () => {
+  const b = $("btnExportar"), msg = $("expMsg");
+  b.disabled = true; b.textContent = "Generando…"; msg.classList.add("oculto");
+  try {
+    const desde = $("eDesde").value;
+    const r = await api("exportarQ10", { token, desde });
+    if (!r.filas.length) { msg.className = "alerta aviso"; msg.textContent = "No hay registros para exportar" + (desde ? " desde esa fecha." : "."); return; }
+    const nombre = "5. Formato Acudientes- Codeudores - Liceo Mayor " + new Date().toISOString().slice(0, 10) + ".xlsx";
+    const blob = await llenarPlantilla(r.filas);
+    if (window.__demoDescarga) window.__demoDescarga(nombre, r.encabezados, r.filas, blob.size);
+    else descargar(blob, nombre);
+    msg.className = "alerta info"; msg.textContent = "Listo: " + r.filas.length.toLocaleString("es-CO") + " filas exportadas en la plantilla de Q10.";
+  } catch (e) { manejarError(e); }
+  finally { b.disabled = false; b.textContent = "Descargar Formato Q10 (.xlsx)"; }
+};
+
+$("btnActualizar").onclick = cargar;
+$("btnSalir").onclick = async () => {
+  try { await api("cerrarSesion", { token }); } catch (e) {}
+  sessionStorage.removeItem("fq10_token"); location.replace("login.html");
+};
+
+cargar();
+</script>
+</body>
+</html>

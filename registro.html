@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Registro de familiares 2027 — I.E. Liceo Mayor de Soledad</title>
+<link rel="icon" href="assets/escudo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css">
+<style>
+  main{max-width:600px;margin:0 auto;padding:18px 16px 60px;}
+  h1{font-size:21px;font-weight:800;margin:6px 0 4px;}
+  .sub{font-size:14px;color:var(--tinta-suave);margin:0 0 18px;line-height:1.55;}
+
+  /* Indicador de pasos */
+  .pasos{display:flex;gap:6px;margin:4px 0 22px;}
+  .pasos div{flex:1;text-align:center;font-size:11px;font-weight:700;color:#9b9488;}
+  .pasos div::before{content:"";display:block;height:6px;border-radius:4px;background:var(--crema-2);margin-bottom:6px;}
+  .pasos div.hecho{color:var(--verde-800);}
+  .pasos div.hecho::before{background:var(--verde-700);}
+  .pasos div.actual{color:var(--marron);}
+  .pasos div.actual::before{background:linear-gradient(90deg,var(--marron),var(--dorado));}
+
+  .tarjeta{background:#fff;border:1.5px solid var(--crema-2);border-radius:16px;padding:18px;margin-bottom:16px;}
+  .autorizacion{font-size:13.5px;line-height:1.65;color:var(--tinta-suave);}
+  .check{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.5;font-weight:600;margin-top:14px;cursor:pointer;}
+  .check input{width:22px;height:22px;flex:0 0 auto;margin-top:1px;accent-color:var(--verde-800);}
+
+  .acciones{display:flex;gap:10px;margin-top:20px;}
+  .acciones .btn-sec{flex:0 0 auto;}
+  .acciones .cta{flex:1;}
+
+  /* Estudiantes */
+  .buscar{display:flex;gap:8px;}
+  .buscar input{flex:1;min-width:0;}
+  .buscar button{flex:0 0 auto;padding:0 18px;border-radius:10px;border:none;background:var(--verde-800);color:#fff;font-weight:700;font-size:14.5px;cursor:pointer;}
+  .buscar button:disabled{opacity:.6;}
+  .confirmar{position:fixed;inset:0;background:rgba(10,30,20,.6);display:flex;align-items:flex-end;justify-content:center;z-index:30;padding:16px;}
+  @media (min-width:560px){ .confirmar{align-items:center;} }
+  .confirmar-caja{background:var(--crema);border-radius:20px;max-width:460px;width:100%;padding:22px 20px 18px;box-shadow:0 20px 50px rgba(0,0,0,.35);max-height:92vh;overflow:auto;}
+  .c-ico{width:52px;height:52px;border-radius:50%;background:var(--dorado);color:#241a08;font-weight:800;font-size:26px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+  .confirmar-caja h2{font-size:19px;text-align:center;margin:0 0 6px;}
+  .c-sub{font-size:13px;color:var(--tinta-suave);text-align:center;margin:0 0 14px;line-height:1.5;}
+  .c-ficha{background:#fff;border:2px solid var(--verde-700);border-radius:14px;padding:14px 16px;}
+  .c-nombre{font-size:18px;font-weight:800;line-height:1.3;margin-bottom:10px;}
+  .c-datos{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;font-size:15px;font-weight:700;}
+  .c-datos span{display:block;font-size:10.5px;font-weight:700;color:var(--marron);text-transform:uppercase;letter-spacing:.05em;}
+  .c-check{font-weight:500;font-size:13.5px;}
+  .c-acc{display:flex;gap:10px;margin-top:16px;}
+  .c-acc .cta{flex:1;margin:0;padding:14px;}
+  .resumen-err{background:var(--rojo-100);border:1.5px solid #e3b9b9;border-radius:14px;padding:14px 16px;margin:0 0 16px;color:#7a2323;font-size:13.5px;scroll-margin-top:12px;}
+  .resumen-err > b{display:block;font-size:14.5px;margin-bottom:8px;}
+  .err-grupo{margin-top:8px;}
+  .err-grupo > span{display:block;font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#a02828;}
+  .err-grupo ol{margin:4px 0 0;padding-left:20px;}
+  .err-grupo li{margin:3px 0;}
+  .err-grupo li button{background:none;border:none;padding:2px 0;text-align:left;color:#7a2323;font-size:13.5px;cursor:pointer;text-decoration:underline;text-decoration-color:#e3b9b9;}
+  .ficha{border:1.5px solid var(--crema-2);border-radius:14px;padding:14px 16px;margin-bottom:12px;background:#fff;}
+  .ficha.acu{border:2px solid var(--verde-700);background:#f6fbf8;}
+  .ficha-cab{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;font-weight:800;color:var(--marron);text-transform:uppercase;letter-spacing:.05em;}
+  .ficha-nombre{font-size:17px;font-weight:800;margin:4px 0 10px;}
+  .ficha dl{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin:0;}
+  .ficha dt{font-size:10.5px;font-weight:700;color:var(--marron);text-transform:uppercase;letter-spacing:.04em;}
+  .ficha dd{margin:1px 0 0;font-size:13.5px;font-weight:600;word-break:break-word;}
+  .vacio-dato{color:#b5ad9f;font-weight:400;}
+  .chip.gris{background:var(--crema-2);color:var(--tinta-suave);}
+  .soporte{text-align:center;font-size:13px;color:var(--tinta-suave);margin:28px 0 0;line-height:1.6;}
+  .soporte a{font-weight:700;}
+  .novedad{margin-top:12px;border:1.5px dashed #e2b85c;border-radius:12px;padding:10px 12px;background:#fffaf0;}
+  .novedad.destacada{border-style:solid;border-width:2px;}
+  .nov-alerta{font-size:13px;line-height:1.5;color:#5c3f0f;margin-bottom:6px;}
+  .nov-check{margin-top:4px;font-weight:500;font-size:13.5px;}
+  .novedad label[for]{margin-top:10px;}
+  .nov-tag{display:block;margin-top:4px;font-size:12px;font-weight:700;color:#8a5a12;background:#fdf3dc;border-radius:6px;padding:3px 7px;}
+  .tag-ok{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--verde-800);}
+  .modo{display:flex;background:var(--crema);border-radius:12px;padding:4px;gap:4px;margin-bottom:6px;}
+  .modo button{flex:1;border:none;background:none;padding:10px;border-radius:9px;font-weight:700;font-size:13.5px;color:var(--tinta-suave);cursor:pointer;}
+  .modo button.activo{background:#fff;color:var(--verde-800);box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .titulo-lista{font-size:13px;color:var(--marron);text-transform:uppercase;letter-spacing:.05em;margin:22px 0 10px;}
+  .titulo-lista span{color:var(--verde-800);}
+  .resultado{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #cfe3d6;}
+  .resultado:first-of-type{border-top:none;}
+  .resultado .info{flex:1;min-width:0;font-size:12.5px;color:var(--tinta-suave);}
+  .resultado .info b{display:block;font-size:15px;color:var(--tinta);letter-spacing:.02em;}
+  .resultado .btn-sec{flex:0 0 auto;padding:9px 14px;}
+  .vinculados{background:var(--verde-100);border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:13px;color:var(--verde-900);line-height:1.6;}
+  .vinculados b{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+  .encontrado{border:1.5px solid var(--verde-700);background:var(--verde-100);border-radius:14px;padding:14px 16px;margin-top:14px;}
+  .encontrado .n{font-size:17px;font-weight:800;letter-spacing:.02em;}
+  .encontrado .d{font-size:13px;color:var(--tinta-suave);margin:3px 0 12px;}
+  .encontrado .acc{display:flex;gap:8px;flex-wrap:wrap;}
+  .lista-est{list-style:none;margin:0;padding:0;display:grid;gap:8px;}
+  .lista-est li{display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--crema-2);border-radius:12px;padding:11px 12px;}
+  .lista-est .ico{flex:0 0 36px;height:36px;border-radius:50%;background:var(--verde-800);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;}
+  .lista-est .info{flex:1;min-width:0;font-size:12.5px;color:var(--tinta-suave);}
+  .lista-est .info b{display:block;font-size:14.5px;color:var(--tinta);}
+  .basura{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1.5px solid #e3b9b9;color:#a02828;border-radius:9px;padding:7px 10px;font-weight:700;font-size:12.5px;cursor:pointer;flex:0 0 auto;}
+  .basura:hover,.basura.armado{background:#a02828;border-color:#a02828;color:#fff;}
+  .basura svg{flex:0 0 auto;}
+  .ya-reg{flex-wrap:wrap;}
+  .aviso-reg{flex:1 0 100%;background:#fdf3dc;border:2px solid #e2b85c;border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.55;color:#5c3f0f;margin-top:8px;}
+  .aviso-reg-tit{font-size:15.5px;font-weight:800;color:#6b4a14;margin-bottom:4px;}
+  .aviso-reg a{font-weight:700;color:#0D6B3E;word-break:break-all;}
+  .vacio{font-size:13px;color:var(--tinta-suave);text-align:center;padding:16px;border:1.5px dashed var(--crema-2);border-radius:12px;}
+
+  /* Familiares */
+  .familiar{background:#fff;border:1.5px solid var(--crema-2);border-radius:16px;padding:0;margin-bottom:16px;overflow:hidden;}
+  .familiar.es-acudiente{border-color:var(--verde-700);}
+  .familiar-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;background:var(--crema-2);}
+  .familiar-cab b{font-size:15px;}
+
+  .familiar-cuerpo{padding:4px 16px 18px;}
+  .seccion{font-size:11.5px;font-weight:800;color:var(--marron);letter-spacing:.05em;text-transform:uppercase;margin:20px 0 0;padding-top:14px;border-top:1px solid var(--crema-2);}
+  .seccion:first-child{border-top:none;padding-top:6px;}
+  .rejilla{display:grid;grid-template-columns:1fr;gap:0 12px;}
+  @media (min-width:560px){ .rejilla{grid-template-columns:1fr 1fr;} .rejilla .ancho{grid-column:1/-1;} }
+  .opciones{display:flex;gap:8px;flex-wrap:wrap;}
+  .opciones label{margin:0;flex:1;min-width:120px;display:flex;align-items:center;gap:8px;padding:12px 14px;border:1.5px solid var(--crema-2);border-radius:10px;cursor:pointer;font-weight:600;}
+  .opciones input{width:18px;height:18px;accent-color:var(--verde-800);}
+  .opciones label:has(input:checked){border-color:var(--verde-700);background:var(--verde-100);}
+  .acudiente-box{margin-top:16px;padding:14px;border-radius:12px;background:var(--crema);border:1.5px solid var(--crema-2);}
+  .acudiente-box label{margin:0;display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;}
+  .acudiente-box input{width:22px;height:22px;accent-color:var(--verde-800);}
+  .acudiente-box .hint{margin:6px 0 0 32px;}
+  .familiar.es-acudiente .acudiente-box{background:var(--verde-100);border-color:var(--verde-700);}
+  .agregar{width:100%;padding:15px;border-radius:14px;border:1.5px dashed var(--verde-700);background:transparent;color:var(--verde-800);font-weight:700;font-size:14.5px;cursor:pointer;}
+  .agregar:disabled{opacity:.5;cursor:not-allowed;}
+
+  /* Revisión */
+  .resumen h3{font-size:12px;font-weight:800;color:var(--marron);letter-spacing:.05em;text-transform:uppercase;margin:0 0 10px;}
+  .resumen .item{padding:10px 0;border-top:1px solid var(--crema-2);font-size:13.5px;line-height:1.55;}
+  .resumen .item:first-of-type{border-top:none;padding-top:0;}
+  .resumen .item b{font-size:14.5px;}
+  .chip{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--verde-800);color:#fff;margin-left:6px;vertical-align:middle;}
+  .editar{background:none;border:none;color:var(--verde-800);font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:underline;float:right;}
+
+  /* Confirmación */
+  .confirmacion{text-align:center;padding-top:10px;}
+  .confirmacion .icono{width:70px;height:70px;border-radius:50%;background:var(--verde-800);color:#fff;font-size:34px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+  .confirmacion h2{font-size:22px;margin:0 0 8px;}
+  .confirmacion p{font-size:14.5px;color:var(--tinta-suave);line-height:1.6;margin:0 0 18px;}
+  .codigo{display:inline-block;font-size:26px;font-weight:800;letter-spacing:.08em;background:#fff;border:2px dashed var(--marron);border-radius:14px;padding:14px 22px;margin-bottom:8px;color:var(--verde-900);}
+  .codigo-fecha{font-size:12.5px;color:var(--tinta-suave);margin-bottom:22px;}
+
+  @media print{ .cabecera,.acciones,.no-imprimir{display:none !important;} body{background:#fff;} }
+</style>
+</head>
+<body>
+<header class="cabecera">
+  <img src="assets/escudo.png" alt="Escudo">
+  <div class="t"><b>I.E. Liceo Mayor de Soledad</b>Actualización de datos de familiares 2027</div>
+</header>
+
+<main>
+  <div class="pasos" id="pasos" aria-hidden="true">
+    <div data-p="1">Autorización</div><div data-p="2">Estudiantes</div><div data-p="3">Familiares</div><div data-p="4">Revisar</div>
+  </div>
+
+  <!-- Cargando / cerrado -->
+  <section id="vCargando"><p class="sub">Cargando…</p></section>
+  <section id="vCerrado" class="oculto">
+    <h1>El registro no está disponible</h1>
+    <div class="alerta aviso" id="msgCerrado"></div>
+    <a class="btn-sec" href="index.html">← Volver al inicio</a>
+  </section>
+
+  <!-- PASO 1: autorización -->
+  <section id="p1" class="oculto">
+    <h1>Antes de empezar</h1>
+    <p class="sub">Con este formulario actualizamos en la plataforma académica Q10 los datos de los familiares de nuestros estudiantes.</p>
+    <div class="alerta info oculto" id="mensajeColegio"></div>
+    <div class="tarjeta">
+      <div class="autorizacion">
+        <b>Autorización de tratamiento de datos personales.</b> En cumplimiento de la Ley 1581 de 2012 y el Decreto 1377 de 2013, autorizo a la I.E. Liceo Mayor de Soledad "Rafael U. Lafaurie Rivera" para recolectar, almacenar y usar los datos que registro en este formulario, con el fin de actualizar la información de familiares y acudientes de los estudiantes en la plataforma académica Q10, operada por Q10 S.A.S. Puedo consultar, actualizar o solicitar la supresión de mis datos en la Secretaría de la institución.
+      </div>
+      <label class="check"><input type="checkbox" id="chkAutoriza"> Sí, autorizo el tratamiento de mis datos y los de los familiares que registro.</label>
+      <div class="err-campo" id="errAutoriza"></div>
+    </div>
+    <div class="acciones">
+      <a class="btn-sec" href="index.html">← Inicio</a>
+      <button class="cta" id="btnP1">Continuar</button>
+    </div>
+  </section>
+
+  <!-- PASO 2: estudiantes -->
+  <section id="p2" class="oculto">
+    <h1>Busque a su(s) hijo(s) o acudido(s)</h1>
+    <p class="sub">Primero vincule al estudiante o estudiantes de los que usted es familiar. Puede buscarlos por número de documento o por nombre.</p>
+    <div class="alerta info">👨‍👩‍👧‍👦 <b>¿Tiene más de un hijo en el colegio?</b> Agréguelos todos aquí: los datos de los familiares quedarán vinculados a cada uno de ellos con un solo registro.</div>
+    <div class="tarjeta">
+      <div class="modo" role="tablist">
+        <button class="activo" data-modo="documento" role="tab">Por documento</button>
+        <button data-modo="nombre" role="tab">Por nombre</button>
+      </div>
+      <div id="bDoc">
+        <label for="docEst">Número de documento del estudiante</label>
+        <div class="buscar">
+          <input type="text" id="docEst" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Ej: 1043123456" maxlength="24">
+          <button id="btnBuscar">Buscar</button>
+        </div>
+        <div class="hint">Tarjeta de identidad, registro civil, PPT o NES, tal como aparece en el SIMAT. Sin puntos ni espacios (si es NES, incluya la letra N).</div>
+      </div>
+      <div id="bNom" class="oculto">
+        <label for="nomEst">Nombres y apellidos del estudiante</label>
+        <div class="buscar">
+          <input type="text" id="nomEst" autocomplete="off" placeholder="Ej: Sofía Pérez Gómez" maxlength="80">
+          <button id="btnBuscarNom">Buscar</button>
+        </div>
+        <div class="hint">Escriba al menos un nombre y un apellido. Entre más completo, más precisa la búsqueda.</div>
+      </div>
+      <div class="alerta oculto" id="errBuscar"></div>
+      <div id="resBuscar"></div>
+    </div>
+    <h3 class="titulo-lista">Estudiantes vinculados <span id="cuentaEst"></span></h3>
+    <ul class="lista-est" id="listaEst"></ul>
+    <div class="alerta oculto" id="errP2"></div>
+    <div class="acciones">
+      <button class="btn-sec" data-ir="1">← Atrás</button>
+      <button class="cta" id="btnP2">Continuar con los familiares</button>
+    </div>
+  </section>
+
+  <!-- PASO 3: familiares -->
+  <section id="p3" class="oculto">
+    <h1>Datos de los familiares</h1>
+    <div class="vinculados" id="vinculados"></div>
+    <div class="resumen-err oculto" id="resumenErr" role="alert"></div>
+    <p class="sub">Diligencie los datos de los familiares (mamá, papá, abuelos…), máximo 4. Son los mismos datos que pide la plataforma Q10. <b>Al menos uno debe ser acudiente</b>: la persona responsable del estudiante ante el colegio. Los campos con <span style="color:var(--rojo)">*</span> son obligatorios.</p>
+    <div id="familiares"></div>
+    <button class="agregar" id="btnAgregarFam">+ Agregar otro familiar</button>
+    <div class="alerta oculto" id="errP3"></div>
+    <div class="acciones">
+      <button class="btn-sec" data-ir="2">← Atrás</button>
+      <button class="cta" id="btnP3">Registrar</button>
+    </div>
+  </section>
+
+  <!-- PASO 4: revisar -->
+  <section id="p4" class="oculto">
+    <h1>Revise la ficha antes de enviar</h1>
+    <p class="sub">Verifique que todo esté bien escrito, en especial los números de documento y celular. Si algo está mal, pulse «Editar».</p>
+    <div class="tarjeta resumen" id="resEst"></div>
+    <div class="tarjeta resumen" id="resFam"></div>
+    <label class="check"><input type="checkbox" id="chkConfirma"> Confirmo que la información es correcta.</label>
+    <div class="alerta oculto" id="errEnviar"></div>
+    <div class="acciones">
+      <button class="btn-sec" data-ir="3">← Atrás</button>
+      <button class="cta" id="btnEnviar">Confirmar y enviar</button>
+    </div>
+  </section>
+
+  <!-- CONFIRMACIÓN -->
+  <section id="vListo" class="oculto confirmacion">
+    <div class="icono">✓</div>
+    <h2>¡Registro recibido!</h2>
+    <p>Gracias. Los datos de sus familiares quedaron registrados y serán cargados en la plataforma Q10.</p>
+    <div class="codigo" id="codigo"></div>
+    <div class="codigo-fecha" id="codigoFecha"></div>
+    <div class="tarjeta resumen" style="text-align:left" id="resFinal"></div>
+    <p style="font-size:13px">Guarde este código (tome una captura de pantalla). Si necesita corregir algo, escríbanos a soporte técnico (<b class="correo-soporte">sistemasliceomayor@gmail.com</b>) indicando el código.</p>
+    <div class="no-imprimir" style="display:grid;gap:10px;">
+      <button class="btn-sec verde" onclick="window.print()">Imprimir o guardar en PDF</button>
+      <a class="btn-sec" href="index.html">Finalizar</a>
+    </div>
+  </section>
+
+  <p class="soporte">¿Dudas o problemas con el formulario? Soporte técnico: <a class="correo-soporte" href="mailto:sistemasliceomayor@gmail.com">sistemasliceomayor@gmail.com</a></p>
+  <p class="copyright">© 2026 Desarrollado por el Departamento de Sistemas — I.E. Liceo Mayor de Soledad "Rafael U. Lafaurie Rivera".</p>
+</main>
+
+<div class="confirmar oculto" id="confirmar"></div>
+
+
+
+<script src="config.js"></script>
+<script>
+const LISTAS = {
+  tipoDocumento: ["Cédula de ciudadanía","Cédula ó identificación de Extranjería","Certificado Cabildo u otro","DNI","Driver License","ID","Número de identificación tributaria","Numero identificación dado por la S.E.","Número unico de identificación personal","Pasaporte"],
+  genero: ["Masculino","Femenino"],
+  tipoSangre: ["A+","A-","AB+","AB-","O+","O-"],
+  estadoCivil: ["Soltero","Casado","Viudo","Unión Libre","Separado"],
+  acudiente: ["SI","NO"],
+  sino: ["SI","NO"],
+  parentesco: ["Padre","Madre","Abuelo","Abuela","Tío","Tía","Hijo","Hija","Nieto","Nieta","Sobrino","Sobrina","Hermano","Hermana","Primo","Prima","Esposo","Esposa","Cuñado","Cuñada","Suegro","Suegra","Yerno","Nuera","Madrastra","Padrastro","Hijastro","Hijastra","Dependientes por custodia Legal o Judicial","Otro"]
+};
+
+/* Campos del familiar (mismos del formato Q10). */
+const CAMPOS = [
+  { sec: "Datos personales" },
+  { k:"primerNombre", l:"Primer Nombre", req:true, max:40 },
+  { k:"segundoNombre", l:"Segundo Nombre", max:40 },
+  { k:"primerApellido", l:"Primer Apellido", req:true, max:40 },
+  { k:"segundoApellido", l:"Segundo Apellido", max:40 },
+  { k:"tipoDocumento", l:"Tipo Documento", req:true, lista:"tipoDocumento", def:"Cédula de ciudadanía" },
+  { k:"numeroDocumento", l:"Número Identificación", req:true, re:/^[A-Za-z0-9]{3,20}$/, msg:"Solo números (o letras y números si es pasaporte), sin puntos ni espacios.", modo:"numeric", hint:"Sin puntos ni espacios.", limpiar:/[^A-Za-z0-9]/g },
+  { k:"municipioExpedicion", l:"Municipio de Expedición del Documento", municipio:true, hint:"Si el documento es de otro país, elija «Otro»." },
+  { k:"genero", l:"Género", req:true, lista:"genero", radio:true, ancho:true },
+  { k:"fechaNacimiento", l:"Fecha de Nacimiento", tipo:"date" },
+  { k:"municipioNacimiento", l:"Municipio de Nacimiento", municipio:true, hint:"Si nació en otro país, elija «Otro»." },
+  { sec: "Contacto y residencia" },
+  { k:"telefono", l:"Teléfono", re:/^[0-9]{7,10}$/, msg:"Solo números, entre 7 y 10 dígitos.", tipo:"tel", modo:"numeric", hint:"Teléfono fijo (opcional).", limpiar:/[^0-9]/g },
+  { k:"celular", l:"Celular", req:true, re:/^3[0-9]{9}$/, msg:"Debe tener 10 dígitos y empezar por 3.", tipo:"tel", modo:"numeric", hint:"10 dígitos, ej: 3001234567", limpiar:/[^0-9]/g },
+  { k:"email", l:"Email", re:/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, msg:"Escriba un correo válido, ej: nombre@gmail.com", tipo:"email", ancho:true, max:100 },
+  { k:"direccion", l:"Dirección", ancho:true, max:100, hint:"Calle o carrera y número. Ej: Cra 34 # 20-18" },
+  { k:"viveConjunto", l:"¿Vive en conjunto, edificio o apartamento?", extra:true, lista:"sino", radio:true, ancho:true, etq:{ SI:"Sí", NO:"No" }, hint:"Si responde «Sí», le pediremos el nombre del conjunto, la torre y el apartamento o casa." },
+  { k:"conjunto", l:"Conjunto o edificio", extra:true, sub:"viveConjunto", max:60, hint:"Ej: Conjunto Los Robles" },
+  { k:"torre", l:"Torre o bloque", extra:true, sub:"viveConjunto", max:20, hint:"Ej: Torre 3" },
+  { k:"apto", l:"Apartamento o casa #", extra:true, sub:"viveConjunto", max:20, hint:"Ej: Apto 502 o Casa 14" },
+  { k:"municipioDireccion", l:"Municipio de la Dirección", municipio:true },
+  { k:"barrio", l:"Barrio", max:60 },
+  { sec: "Otros datos" },
+  { k:"tipoSangre", l:"Tipo de Sangre", lista:"tipoSangre" },
+  { k:"estadoCivil", l:"Estado Civil", lista:"estadoCivil" },
+  { sec: "Relación con el estudiante" },
+  { k:"parentesco", l:"Parentesco", req:true, lista:"parentesco", hint:"¿Qué es este familiar del estudiante? Ej: si es la mamá, elija «Madre».", ancho:true },
+  { k:"acudiente", l:"¿Es acudiente del estudiante?", req:true, lista:"acudiente", radio:true, ancho:true, etq:{ SI:"Sí, soy el acudiente", NO:"No" }, hint:"El acudiente es la persona responsable del estudiante ante el colegio. Al menos un familiar debe ser acudiente." }
+];
+const MAX_FAM = 4, MAX_EST = 6;
+let SOPORTE = "sistemasliceomayor@gmail.com";
+const MUN_ATLANTICO = ["Soledad","Barranquilla","Malambo","Galapa","Puerto Colombia","Baranoa","Sabanagrande","Sabanalarga","Santo Tomás","Palmar de Varela","Ponedera","Polonuevo","Campo de la Cruz","Candelaria","Juan de Acosta","Luruaco","Manatí","Piojó","Repelón","Santa Lucía","Suan","Tubará","Usiacurí"];
+const MUN_COLOMBIA = ["Bogotá D.C.","Medellín","Cali","Cartagena","Santa Marta","Valledupar","Sincelejo","Montería","Riohacha","Maicao","Ciénaga","Magangué","Bucaramanga","Cúcuta","Pereira","Manizales","Ibagué","Villavicencio"];
+const OTRO = "__otro";
+/* Mismo formato que aplica el servidor (tipo título) */
+/**
+ * Tipo título. modo "nombre": "ANA MARÍA DE LA HOZ" → "Ana María de la Hoz".
+ * modo "lugar": "calle 20b # 3-45, conjunto los robles" → "Calle 20B # 3-45, Conjunto Los Robles"; "bogotá d.c." → "Bogotá D.C."
+ */
+function tipoTitulo(texto, modo) {
+  const MENORES = modo === 'lugar' ? ['de', 'del', 'y', 'e', 'en'] : ['de', 'del', 'la', 'las', 'los', 'el', 'y', 'e', 'da', 'do', 'dos', 'van', 'von', 'en'];
+  let inicio = true;
+  return String(texto || '').replace(/\s+/g, ' ').trim().toLowerCase()
+    .replace(/[^\s,\-\/()#]+|[,\/]/g, function (p) {
+      if (p === ',' || p === '/') { inicio = true; return p; }                    // después de coma o "/" empieza otra parte
+      let r;
+      if (/^([a-zñ]\.)+[a-zñ]?\.?$/i.test(p)) r = p.toUpperCase();                 // siglas: d.c.
+      else if (/^\d+[a-zñ]{1,2}$/i.test(p)) r = p.toUpperCase();                  // nomenclatura: 20b
+      else if (!inicio && MENORES.indexOf(p) >= 0) r = p;                         // de, del, la…
+      else r = p.charAt(0).toUpperCase() + p.slice(1).replace(/'(\S)/, (m, l) => "'" + l.toUpperCase());
+      inicio = false;
+      return r;
+    });
+}
+
+const FORMATO = { primerNombre:"nombre", segundoNombre:"nombre", primerApellido:"nombre", segundoApellido:"nombre",
+  municipioExpedicion:"lugar", municipioNacimiento:"lugar", municipioDireccion:"lugar", barrio:"lugar", direccion:"lugar",
+  conjunto:"lugar", torre:"lugar", apto:"lugar" };
+
+const S = { autoriza:false, estudiantes:[], familiares:[], encontrado:null };
+const $ = id => document.getElementById(id);
+
+/* ---------- borrador (por si se recarga la página) ---------- */
+function guardar(){ try{ sessionStorage.setItem("famq10", JSON.stringify({autoriza:S.autoriza,estudiantes:S.estudiantes,familiares:S.familiares})); }catch(e){} }
+function recuperar(){ try{ const d=JSON.parse(sessionStorage.getItem("famq10")||"null"); if(d){ Object.assign(S,d); } }catch(e){} }
+function borrar(){ try{ sessionStorage.removeItem("famq10"); }catch(e){} }
+
+/* ---------- navegación ---------- */
+function irA(n){
+  ["vCargando","vCerrado","p1","p2","p3","p4","vListo"].forEach(id => $(id).classList.add("oculto"));
+  $(typeof n === "number" ? "p"+n : n).classList.remove("oculto");
+  document.querySelectorAll("#pasos div").forEach(d => {
+    const p = +d.dataset.p;
+    d.className = typeof n !== "number" ? (n==="vListo" ? "hecho" : "") : (p < n ? "hecho" : p === n ? "actual" : "");
+  });
+  if (n === 2) pintarEstudiantes();
+  if (n === 3) pintarFamiliares();
+  if (n === 4) pintarResumen();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+document.querySelectorAll("[data-ir]").forEach(b => b.addEventListener("click", () => { if (+b.dataset.ir === 2 && !$("p3").classList.contains("oculto")) leerFamiliares(); irA(+b.dataset.ir); }));
+
+function mostrarError(id, msg){ const e=$(id); e.textContent=msg||""; e.classList.toggle("oculto", !msg); if(msg) e.scrollIntoView({block:"center",behavior:"smooth"}); }
+
+/* ---------- inicio ---------- */
+(async () => {
+  recuperar();
+  try {
+    const r = await api("estado");
+    if (!r.abierto) {
+      $("msgCerrado").textContent = "En este momento el registro de familiares no está abierto. Si tiene dudas, escríbanos a soporte técnico: " + SOPORTE + ".";
+      irA("vCerrado"); return;
+    }
+    if (r.soporte) {
+      SOPORTE = r.soporte;
+      document.querySelectorAll(".correo-soporte").forEach(a => { a.textContent = SOPORTE; if (a.href) a.href = "mailto:" + SOPORTE; });
+    }
+    if (r.mensaje) { $("mensajeColegio").textContent = r.mensaje; $("mensajeColegio").classList.remove("oculto"); }
+    $("chkAutoriza").checked = S.autoriza;
+    irA(1);
+  } catch (e) {
+    $("msgCerrado").textContent = e.message; irA("vCerrado");
+  }
+})();
+
+/* ---------- paso 1 ---------- */
+$("btnP1").addEventListener("click", () => {
+  S.autoriza = $("chkAutoriza").checked;
+  if (!S.autoriza) { $("errAutoriza").textContent = "Para continuar debe marcar la autorización."; return; }
+  $("errAutoriza").textContent = ""; guardar(); irA(2);
+});
+
+/* ---------- paso 2: estudiantes ---------- */
+let modo = "documento", resultados = [];
+document.querySelectorAll(".modo button").forEach(b => b.onclick = () => {
+  modo = b.dataset.modo;
+  document.querySelectorAll(".modo button").forEach(x => x.classList.toggle("activo", x === b));
+  $("bDoc").classList.toggle("oculto", modo !== "documento");
+  $("bNom").classList.toggle("oculto", modo !== "nombre");
+  mostrarError("errBuscar", ""); $("resBuscar").innerHTML = ""; resultados = [];
+  $(modo === "documento" ? "docEst" : "nomEst").focus();
+});
+$("docEst").addEventListener("input", e => { const v = e.target.value.replace(/[^A-Za-z0-9]/g, ""); if (v !== e.target.value) e.target.value = v; });
+$("docEst").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); buscar(); } });
+$("nomEst").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); buscar(); } });
+$("btnBuscar").addEventListener("click", buscar);
+$("btnBuscarNom").addEventListener("click", buscar);
+
+let docIntentado = "";   // documento que el padre escribió y no apareció en el sistema
+const TIPOS_DOC_EST = ["Tarjeta de identidad", "Registro civil", "PPT - Permiso por Protección Temporal", "NES - Número establecido por la Secretaría", "Cédula de ciudadanía", "Cédula de extranjería", "Pasaporte", "Otro"];
+
+function avisoDocNoEncontrado(doc){
+  const e = $("errBuscar");
+  e.innerHTML = '<b>No encontramos un estudiante con el documento ' + esc(doc) + '.</b><br>' +
+    'Si su hijo(a) cambió de documento hace poco (por ejemplo, de registro civil a tarjeta de identidad), es posible que en el colegio aún esté el anterior. ' +
+    '<b>Búsquelo por su nombre</b>: si lo encuentra, podrá vincularlo y reportarnos el documento nuevo.' +
+    '<div style="margin-top:10px"><button class="btn-sec verde" id="irNombre">🔎 Buscar por nombre</button></div>';
+  e.classList.remove("oculto");
+  $("irNombre").onclick = () => document.querySelector('.modo button[data-modo="nombre"]').click();
+}
+
+const detalleEst = e => "Grado " + esc(e.grado) + " · Curso " + esc(e.curso) + (e.jornada ? " · Jornada " + esc(e.jornada) : "");
+
+async function buscar(){
+  mostrarError("errBuscar", ""); $("resBuscar").innerHTML = ""; resultados = [];
+  if (S.estudiantes.length >= MAX_EST) { mostrarError("errBuscar", "Puede vincular máximo " + MAX_EST + " estudiantes."); return; }
+  let datos;
+  if (modo === "documento") {
+    const doc = $("docEst").value.replace(/[^A-Za-z0-9]/g, "");
+    if (!/^[A-Za-z0-9]{4,20}$/.test(doc)) { mostrarError("errBuscar", "Escriba el documento del estudiante sin puntos ni espacios."); return; }
+    datos = { documento: doc };
+  } else {
+    const nom = $("nomEst").value.trim();
+    if (nom.split(/\s+/).filter(w => w.length >= 3).length < 2) { mostrarError("errBuscar", "Escriba al menos un nombre y un apellido del estudiante."); return; }
+    datos = { nombre: nom };
+  }
+  const b = modo === "documento" ? $("btnBuscar") : $("btnBuscarNom");
+  b.disabled = true; b.textContent = "Buscando…";
+  try {
+    const r = await api("buscarEstudiante", datos);
+    if (!r.encontrado) {
+      if (modo === "documento") { docIntentado = datos.documento; avisoDocNoEncontrado(datos.documento); return; }
+      mostrarError("errBuscar", "No encontramos estudiantes con ese nombre. Revise cómo lo escribió o intente buscar por documento. Si el problema sigue, escriba a soporte técnico: " + SOPORTE);
+      return;
+    }
+    if (modo === "documento") docIntentado = "";
+    resultados = r.estudiantes;
+    pintarResultados(r.total);
+  } catch (e) {
+    mostrarError("errBuscar", e.message);
+  } finally { b.disabled = false; b.textContent = "Buscar"; }
+}
+
+function pintarResultados(total){
+  if (!resultados.length) { $("resBuscar").innerHTML = ""; return; }
+  const n = total || resultados.length;
+  const enc = modo === "documento"
+    ? "Encontramos este estudiante con ese documento:"
+    : (n === 1 ? "Encontramos 1 estudiante con ese nombre." : "Encontramos <b>" + n + " estudiantes</b> con ese nombre.") +
+      " Revise bien el <b>nombre completo, la jornada, el grado y el curso</b> antes de seleccionar.";
+  $("resBuscar").innerHTML = '<div class="encontrado"><div class="d" style="margin:0 0 6px;color:var(--verde-900)">' + enc + '</div>' +
+    (n > resultados.length ? '<div class="alerta aviso" style="margin:6px 0">Se muestran los primeros ' + resultados.length + ' de ' + n + '. Escriba el nombre más completo (con los dos apellidos) para encontrarlo más fácil.</div>' : '') +
+    resultados.map((e, i) => {
+      const ya = S.estudiantes.some(x => x.huella === e.huella);
+      if (e.registrosPrevios) {
+        return '<div class="resultado ya-reg"><div class="info"><b>' + esc(e.nombre) + '</b>' + detalleEst(e) + '<br>Doc. ' + esc(e.documento) + '</div>' +
+          '<div class="aviso-reg"><div class="aviso-reg-tit">✓ Este estudiante ya tiene familiares y acudiente registrados</div>' +
+          'No es necesario registrarlo de nuevo. Si hay un error en los datos o necesita agregar a otro familiar, escriba a soporte técnico: ' +
+          '<a class="correo-soporte" href="mailto:' + esc(SOPORTE) + '">' + esc(SOPORTE) + '</a>, indicando el nombre y el curso del estudiante.</div></div>';
+      }
+      return '<div class="resultado"><div class="info"><b>' + esc(e.nombre) + '</b>' + detalleEst(e) + '<br>Doc. ' + esc(e.documento) + '</div>' +
+        (ya ? '<span class="tag-ok">✓ Vinculado</span>' : '<button class="btn-sec verde" data-sel="' + i + '">Seleccionar</button>') + '</div>';
+    }).join("") +
+    '<div style="margin-top:8px"><button class="btn-sec" id="btnNoEst" style="width:100%">Ninguno es mi estudiante</button></div></div>';
+  $("resBuscar").querySelectorAll("[data-sel]").forEach(b => b.onclick = () => confirmarEst(resultados[+b.dataset.sel]));
+  $("btnNoEst").onclick = () => { resultados = []; $("resBuscar").innerHTML = ""; $(modo === "documento" ? "docEst" : "nomEst").focus(); };
+}
+
+/* Confirmación obligatoria antes de vincular, para evitar vincular a otro estudiante por error */
+function novedadHTML(e){
+  const vino = !!docIntentado;
+  return '<div class="novedad' + (vino ? " destacada" : "") + '">' +
+    (vino ? '<div class="nov-alerta">⚠ Usted buscó el documento <b>' + esc(docIntentado) + '</b> y no apareció. El colegio tiene registrado un documento terminado en <b>' + esc(String(e.documento).slice(-3)) + '</b>. Si el nombre, la jornada, el grado y el curso sí son los de su hijo(a), puede vincularlo y reportarnos el documento actual.</div>' : '') +
+    '<label class="check nov-check"><input type="checkbox" id="nChk"' + (vino ? " checked" : "") + '><span>El documento de mi hijo(a) <b>cambió</b>: el que tiene el colegio (terminado en ' + esc(String(e.documento).slice(-3)) + ') no es el actual.</span></label>' +
+    '<div id="nCampos" class="' + (vino ? "" : "oculto") + '">' +
+      '<label for="nTipo">Tipo de documento actual</label><select id="nTipo"><option value="">Seleccione…</option>' + TIPOS_DOC_EST.map(t => '<option>' + esc(t) + '</option>').join("") + '</select>' +
+      '<label for="nNum">Número de documento actual</label><input type="text" id="nNum" autocomplete="off" autocapitalize="characters" maxlength="20" value="' + esc(docIntentado) + '">' +
+      '<div class="hint">Lo usaremos solo para corregir el dato en el colegio (SIMAT). El vínculo se hace con el estudiante que usted confirmó.</div>' +
+    '</div></div>';
+}
+
+function confirmarEst(e){
+  if (e.registrosPrevios) return;
+  const porNombre = /•/.test(String(e.documento));
+  const m = $("confirmar");
+  m.innerHTML = '<div class="confirmar-caja" role="dialog" aria-modal="true" aria-labelledby="cTit">' +
+    '<div class="c-ico">?</div><h2 id="cTit">¿Este es su hijo(a) o acudido(a)?</h2>' +
+    '<p class="c-sub">Verifique con cuidado. Los datos de los familiares quedarán vinculados a este estudiante.</p>' +
+    '<div class="c-ficha"><div class="c-nombre">' + esc(e.nombre) + '</div>' +
+    '<div class="c-datos"><div><span>Jornada</span>' + esc(e.jornada || "—") + '</div><div><span>Grado</span>' + esc(e.grado) + '</div><div><span>Curso</span>' + esc(e.curso) + '</div><div><span>Documento</span>' + esc(e.documento) + '</div></div></div>' +
+    (porNombre ? novedadHTML(e) : '') +
+    '<label class="check c-check"><input type="checkbox" id="cChk"><span>Confirmo que <b>' + esc(e.nombre) + '</b>, del curso <b>' + esc(e.curso) + '</b>, es mi hijo(a) o acudido(a).</span></label>' +
+    '<div class="alerta oculto" id="cErr"></div>' +
+    '<div class="c-acc"><button class="btn-sec" id="cNo">No, volver</button><button class="cta" id="cSi" disabled>Sí, vincular</button></div></div>';
+  m.classList.remove("oculto"); document.body.style.overflow = "hidden";
+  const cerrar = () => { m.classList.add("oculto"); m.innerHTML = ""; document.body.style.overflow = ""; };
+  $("cChk").onchange = () => { $("cSi").disabled = !$("cChk").checked; };
+  $("cNo").onclick = cerrar;
+  m.onclick = ev => { if (ev.target === m) cerrar(); };
+  if ($("nChk")) {
+    $("nChk").onchange = () => $("nCampos").classList.toggle("oculto", !$("nChk").checked);
+    $("nNum").addEventListener("input", ev => { const v = ev.target.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase(); if (v !== ev.target.value) ev.target.value = v; });
+  }
+  $("cSi").onclick = () => {
+    let novedad = null;
+    if ($("nChk") && $("nChk").checked) {
+      const tipo = $("nTipo").value, numero = $("nNum").value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+      const err = !tipo ? "Seleccione el tipo de documento actual de su hijo(a)." : !/^[A-Z0-9]{4,20}$/.test(numero) ? "Escriba el número de documento actual (sin puntos ni espacios)." : "";
+      if (err) { const c = $("cErr"); c.textContent = err; c.classList.remove("oculto"); return; }
+      novedad = { tipo, numero };
+    }
+    cerrar(); e = Object.assign({}, e, { novedad }); if (!novedad) delete e.novedad; agregarEst(e); docIntentado = "";
+  };
+  $("cNo").focus();
+}
+
+function agregarEst(e){
+  if (S.estudiantes.some(x => x.huella === e.huella)) return;
+  if (S.estudiantes.length >= MAX_EST) { mostrarError("errBuscar", "Puede vincular máximo " + MAX_EST + " estudiantes."); return; }
+  S.estudiantes.push(e); guardar();
+  resultados = []; $("resBuscar").innerHTML = ""; $("docEst").value = ""; $("nomEst").value = "";
+  pintarEstudiantes(); mostrarError("errP2", "");
+  $("listaEst").scrollIntoView({ block: "start", behavior: "smooth" });
+}
+
+const novedadLinea = e => e.novedad ? '<span class="nov-tag">⚠ Novedad: documento actual ' + esc(e.novedad.tipo) + ' ' + esc(e.novedad.numero) + '</span>' : '';
+
+function pintarEstudiantes(){
+  const ul = $("listaEst");
+  $("cuentaEst").textContent = S.estudiantes.length ? "(" + S.estudiantes.length + ")" : "";
+  if (!S.estudiantes.length) { ul.innerHTML = '<li class="vacio" style="display:block">Aún no ha vinculado estudiantes. Búsquelos arriba.</li>'; return; }
+  ul.innerHTML = S.estudiantes.map((e, i) =>
+    '<li><span class="ico">' + (i + 1) + '</span><span class="info"><b>' + esc(e.nombre) + '</b>' + detalleEst(e) + '<br>Doc. ' + esc(e.documento) + novedadLinea(e) + '</span>' +
+    '<button class="basura" data-q="' + i + '" aria-label="Eliminar a ' + esc(e.nombre) + '" title="Eliminar"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg><span>Eliminar</span></button></li>').join("") +
+    (S.estudiantes.length < MAX_EST ? '<li class="vacio" style="display:block;border-style:dashed">¿Tiene otro hijo o acudido en el colegio? Búsquelo arriba y agréguelo.</li>' : '');
+  ul.querySelectorAll("button[data-q]").forEach(b => b.onclick = () => { S.estudiantes.splice(+b.dataset.q, 1); guardar(); pintarEstudiantes(); });
+}
+
+$("btnP2").addEventListener("click", () => {
+  if (resultados.length && !S.estudiantes.length) { mostrarError("errP2", "Encontramos estudiantes pero no ha agregado ninguno. Pulse «+ Agregar» en el suyo."); return; }
+  if (!S.estudiantes.length) { mostrarError("errP2", "Vincule al menos un estudiante para continuar."); return; }
+  mostrarError("errP2", ""); resultados = []; $("resBuscar").innerHTML = "";
+  if (!S.familiares.length) S.familiares.push(nuevoFam()); irA(3);
+});
+
+/* ---------- paso 3: familiares ---------- */
+function nuevoFam(){ const f = {}; CAMPOS.forEach(c => { if (c.k) f[c.k] = c.def || ""; }); return f; }
+
+function campoHTML(c, i, f){
+  const id = "f" + i + "_" + c.k, v = f[c.k] || "";
+  const lab = '<label for="' + id + '">' + esc(c.l) + (c.req ? ' <span class="req">*</span>' : '') + '</label>';
+  let ctl;
+  if (c.radio) {
+    ctl = '<div class="opciones" role="radiogroup" id="' + id + '">' + LISTAS[c.lista].map(o =>
+      '<label><input type="radio" name="' + id + '" value="' + esc(o) + '"' + (v === o ? " checked" : "") + '> ' + esc(c.etq ? c.etq[o] : o) + '</label>').join("") + '</div>';
+    return '<div class="ancho"><label>' + esc(c.l) + (c.req ? ' <span class="req">*</span>' : '') + '</label>' + ctl + (c.hint ? '<div class="hint">' + esc(c.hint) + '</div>' : '') + '<div class="err-campo" id="e_' + id + '"></div></div>';
+  }
+  if (c.municipio) {
+    const conocido = !f[c.k + "_otro"] && (!v || MUN_ATLANTICO.includes(v) || MUN_COLOMBIA.includes(v));
+    const opt = o => '<option' + (v === o ? " selected" : "") + '>' + esc(o) + '</option>';
+    ctl = '<select id="' + id + '" data-mun="1"><option value="">Seleccione…</option>' +
+      '<optgroup label="Atlántico">' + MUN_ATLANTICO.map(opt).join("") + '</optgroup>' +
+      '<optgroup label="Otras ciudades de Colombia">' + MUN_COLOMBIA.map(opt).join("") + '</optgroup>' +
+      '<option value="' + OTRO + '"' + (!conocido ? " selected" : "") + '>Otro municipio o país (Venezuela, Chile…)</option></select>' +
+      '<input id="' + id + '_otro" type="text" maxlength="80" placeholder="Escriba ciudad y país. Ej: Caracas, Venezuela" class="' + (conocido ? "oculto" : "") + '" style="margin-top:8px" value="' + (conocido ? "" : esc(v)) + '" autocomplete="off">';
+  } else if (c.lista) {
+    ctl = '<select id="' + id + '"><option value="">Seleccione…</option>' + LISTAS[c.lista].map(o =>
+      '<option' + (v === o ? " selected" : "") + '>' + esc(o) + '</option>').join("") + '</select>';
+  } else {
+    ctl = '<input id="' + id + '" type="' + (c.tipo || "text") + '"' + (c.modo ? ' inputmode="' + c.modo + '"' : '') +
+      (c.municipio ? ' list="municipios" placeholder="Ej: Soledad"' : '') + (c.max ? ' maxlength="' + c.max + '"' : '') +
+      (c.tipo === "date" ? ' max="' + new Date().toISOString().slice(0, 10) + '" min="1900-01-01"' : '') +
+      ' value="' + esc(v) + '" autocomplete="off">';
+  }
+  const ocultoSub = c.sub && f[c.sub] !== "SI" ? " oculto" : "";
+  return '<div class="' + (c.ancho ? "ancho" : "") + (c.sub ? " sub-" + c.sub : "") + ocultoSub + '">' + lab + ctl + (c.hint ? '<div class="hint">' + esc(c.hint) + '</div>' : '') + '<div class="err-campo" id="e_' + id + '"></div></div>';
+}
+
+function pintarFamiliares(){
+  $("vinculados").innerHTML = "<b>Familiares de:</b>" + S.estudiantes.map(e => esc(e.nombre) + " — Grado " + esc(e.grado) + ", curso " + esc(e.curso)).join("<br>");
+  const cont = $("familiares");
+  cont.innerHTML = S.familiares.map((f, i) => {
+    let html = "", abierto = false;
+    CAMPOS.forEach(c => {
+      if (c.sec) { if (abierto) html += "</div>"; html += '<div class="seccion">' + esc(c.sec) + '</div><div class="rejilla">'; abierto = true; }
+      else html += campoHTML(c, i, f);
+    });
+    if (abierto) html += "</div>";
+    const acu = f.acudiente === "SI";
+    return '<div class="familiar' + (acu ? " es-acudiente" : "") + '" id="fam' + i + '">' +
+      '<div class="familiar-cab"><b>Familiar ' + (i + 1) + (acu ? ' <span class="chip">Acudiente</span>' : '') + '</b>' +
+      (S.familiares.length > 1 ? '<button class="basura" data-quitar="' + i + '" aria-label="Eliminar familiar ' + (i + 1) + '" title="Eliminar familiar"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg><span>Eliminar</span></button>' : '') + '</div>' +
+      '<div class="familiar-cuerpo">' + html + '</div></div>';
+  }).join("");
+  $("btnAgregarFam").disabled = S.familiares.length >= MAX_FAM;
+  $("btnAgregarFam").textContent = S.familiares.length >= MAX_FAM ? "Máximo " + MAX_FAM + " familiares" : "+ Agregar otro familiar";
+
+  cont.querySelectorAll("[data-quitar]").forEach(b => b.onclick = () => {
+    leerFamiliares();
+    const i = +b.dataset.quitar;
+    const tieneDatos = CAMPOS.some(c => c.k && !c.def && S.familiares[i][c.k]);
+    if (tieneDatos && !b.classList.contains("armado")) {
+      b.classList.add("armado"); b.querySelector("span").textContent = "¿Eliminar? Toque de nuevo";
+      setTimeout(() => { if (b.isConnected) { b.classList.remove("armado"); b.querySelector("span").textContent = "Eliminar"; } }, 4000);
+      return;
+    }
+    S.familiares.splice(i, 1);
+    guardar(); pintarFamiliares();
+  });
+  cont.querySelectorAll('input[name$="_viveConjunto"]').forEach(r => r.addEventListener("change", () => {
+    const i = +r.name.slice(1, r.name.indexOf("_"));
+    $("fam" + i).querySelectorAll(".sub-viveConjunto").forEach(d => d.classList.toggle("oculto", r.value !== "SI"));
+    if (r.value === "SI") setTimeout(() => $("f" + i + "_conjunto").focus(), 50);
+  }));
+  cont.querySelectorAll('input[name$="_acudiente"]').forEach(r => r.addEventListener("change", () => {
+    leerFamiliares(); guardar();
+    const i = +r.name.slice(1, r.name.indexOf("_")), acu = r.value === "SI", card = $("fam" + i);
+    card.classList.toggle("es-acudiente", acu);
+    card.querySelector(".familiar-cab b").innerHTML = "Familiar " + (i + 1) + (acu ? ' <span class="chip">Acudiente</span>' : "");
+  }));
+  cont.querySelectorAll("input,select").forEach(el => el.addEventListener("change", () => { leerFamiliares(); guardar(); }));
+  cont.querySelectorAll("select[data-mun]").forEach(sel => sel.addEventListener("change", () => {
+    const o = $(sel.id + "_otro"); o.classList.toggle("oculto", sel.value !== OTRO); if (sel.value === OTRO) o.focus();
+  }));
+  // Al salir de la casilla, se acomodan mayúsculas y minúsculas (ej: "ANA MARÍA" → "Ana María")
+  S.familiares.forEach((f, i) => Object.keys(FORMATO).forEach(k => {
+    [$("f" + i + "_" + k), $("f" + i + "_" + k + "_otro")].forEach(el => {
+      if (el && el.tagName === "INPUT") el.addEventListener("blur", () => { const v = tipoTitulo(el.value, FORMATO[k]); if (v !== el.value) { el.value = v; leerFamiliares(); guardar(); } });
+    });
+  }));
+  // Correo siempre en minúscula
+  S.familiares.forEach((f, i) => { const el = $("f" + i + "_email"); if (el) el.addEventListener("blur", () => { el.value = el.value.trim().toLowerCase(); }); });
+  // Quita puntos, espacios y guiones mientras se escribe o se pega (documento, celular, teléfono)
+  S.familiares.forEach((f, i) => CAMPOS.forEach(c => {
+    if (!c.limpiar) return;
+    const el = $("f" + i + "_" + c.k);
+    el.addEventListener("input", () => { const v = el.value.replace(c.limpiar, ""); if (v !== el.value) el.value = v; });
+  }));
+}
+
+function leerFamiliares(){
+  S.familiares.forEach((f, i) => CAMPOS.forEach(c => {
+    if (!c.k) return;
+    const id = "f" + i + "_" + c.k;
+    if (c.radio) { const r = document.querySelector('input[name="' + id + '"]:checked'); f[c.k] = r ? r.value : ""; return; }
+    const el = $(id); if (!el) return;
+    if (c.municipio && el.value === OTRO) { const o = $(id + "_otro"); f[c.k] = o.value.replace(/\s+/g, " ").trim(); f[c.k + "_otro"] = true; return; }
+    f[c.k] = el.value.replace(/\s+/g, " ").trim(); delete f[c.k + "_otro"];
+  }));
+}
+
+$("btnAgregarFam").addEventListener("click", () => {
+  leerFamiliares();
+  if (S.familiares.length >= MAX_FAM) return;
+  S.familiares.push(nuevoFam()); guardar(); pintarFamiliares();
+  const ult = $("fam" + (S.familiares.length - 1)); ult.scrollIntoView({behavior:"smooth", block:"start"});
+});
+
+function validarFamiliares(){
+  leerFamiliares();
+  const errores = [];
+  const docs = {};
+  S.familiares.forEach((f, i) => CAMPOS.forEach(c => {
+    if (!c.k) return;
+    const id = "f" + i + "_" + c.k;
+    let v = f[c.k] || "", msg = "";
+    if (c.limpiar) { v = v.replace(c.limpiar, ""); f[c.k] = v; const el=$(id); if (el) el.value = v; }
+    if (!v) {
+      if (c.req) msg = c.radio || c.lista ? "Seleccione una opción." : "Este dato es obligatorio.";
+      if (c.municipio && $(id) && $(id).value === OTRO) msg = "Escriba la ciudad o municipio y el país.";
+    }
+    else if (c.re && !c.re.test(v)) msg = c.msg;
+    if (!msg && c.k === "numeroDocumento" && v) {
+      if (docs[v]) msg = "Este documento ya lo escribió en otro familiar.";
+      docs[v] = true;
+    }
+    const e = $("e_" + id), el = $(id);
+    if (e) e.textContent = msg;
+    if (el && !c.radio) el.classList.toggle("invalido", !!msg);
+    if (msg) errores.push({ i, id, campo: c.l, msg });
+  }));
+  // Al menos un familiar debe ser acudiente
+  const sinAcudiente = S.familiares.length && !S.familiares.some(f => f.acudiente === "SI") &&
+    S.familiares.every(f => f.acudiente);   // si alguno no respondió, ya aparece arriba
+  if (sinAcudiente) {
+    S.familiares.forEach((f, i) => { const e = $("e_f" + i + "_acudiente"); if (e) e.textContent = "Ningún familiar está marcado como acudiente."; });
+    errores.push({ i: -1, id: "f0_acudiente", campo: "Acudiente", msg: "Ningún familiar está marcado como acudiente. Marque «Sí, soy el acudiente» en al menos uno." });
+  }
+  guardar();
+  pintarResumenErrores(errores);
+  return !errores.length;
+}
+
+/* Lista de errores en orden: Familiar 1 de arriba hacia abajo, luego Familiar 2… */
+function pintarResumenErrores(errores){
+  const box = $("resumenErr");
+  if (!errores.length) { box.classList.add("oculto"); box.innerHTML = ""; return; }
+  const grupos = {};
+  errores.forEach(x => (grupos[x.i] = grupos[x.i] || []).push(x));
+  box.innerHTML = '<b>Hay ' + errores.length + (errores.length === 1 ? ' dato por corregir' : ' datos por corregir') + ' antes de registrar:</b>' +
+    Object.keys(grupos).sort((a, b) => (a < 0 ? 99 : a) - (b < 0 ? 99 : b)).map(k =>
+      '<div class="err-grupo"><span>' + (+k < 0 ? "General" : "Familiar " + (+k + 1) + (etiquetaFam(S.familiares[k]) ? " — " + esc(etiquetaFam(S.familiares[k])) : "")) + '</span><ol>' +
+      grupos[k].map(x => '<li><button data-ir-campo="' + x.id + '"><b>' + esc(x.campo) + ':</b> ' + esc(x.msg) + '</button></li>').join("") + '</ol></div>').join("") +
+    '<div class="hint" style="margin-top:6px">Toque cada punto para ir al dato. Los campos con error están marcados en rojo.</div>';
+  box.classList.remove("oculto");
+  box.querySelectorAll("[data-ir-campo]").forEach(b => b.onclick = () => {
+    const el = $(b.dataset.irCampo) || document.querySelector('[name="' + b.dataset.irCampo + '"]');
+    if (el) { el.scrollIntoView({ block: "center", behavior: "smooth" }); setTimeout(() => (el.focus ? el.focus({ preventScroll: true }) : 0), 350); }
+  });
+  box.scrollIntoView({ block: "start", behavior: "smooth" });
+}
+
+$("btnP3").addEventListener("click", () => {
+  if (!validarFamiliares()) { mostrarErrorSinMover("errP3", "Hay datos por corregir. Vea la lista en la parte de arriba."); return; }
+  mostrarError("errP3", ""); irA(4);
+});
+function mostrarErrorSinMover(id, msg){ const e=$(id); e.textContent=msg; e.classList.remove("oculto"); }
+
+/* ---------- paso 4: revisar y enviar ---------- */
+/** Une dirección + conjunto/edificio + torre + apto/casa en el texto que va a la celda «Dirección» de Q10 */
+function direccionCompleta(f){
+  if (f.viveConjunto !== "SI") return String(f.direccion || "").trim();
+  const pref = (v, re, etq) => { v = String(v || "").trim(); if (!v) return ""; return re.test(v) ? v : etq + " " + v; };
+  return [f.direccion, pref(f.conjunto, /^(conj|edif|urb)/i, "Conjunto/Edificio"), pref(f.torre, /^(torre|bloque)/i, "Torre"), pref(f.apto, /^(apto|apartamento|casa)/i, "Apto/Casa")]
+    .map(x => String(x || "").trim()).filter(Boolean).join(", ");
+}
+function etiquetaFam(f){ return [f.primerNombre, f.segundoNombre, f.primerApellido, f.segundoApellido].filter(Boolean).join(" "); }
+function resumenEstHTML(lista){
+  return '<h3>Estudiantes vinculados</h3>' + lista.map(e => '<div class="item"><b>' + esc(e.nombre) + '</b><br>' + detalleEst(e) + '<br>Doc. ' + esc(e.documento) + novedadLinea(e) + '</div>').join("");
+}
+const FICHA = [
+  ["parentesco", "Parentesco"], ["tipoDocumento", "Tipo de documento"], ["numeroDocumento", "Número de identificación"],
+  ["municipioExpedicion", "Municipio de expedición"], ["genero", "Género"], ["fechaNacimiento", "Fecha de nacimiento"],
+  ["municipioNacimiento", "Municipio de nacimiento"], ["celular", "Celular"], ["telefono", "Teléfono"], ["email", "Email"],
+  ["__direccion", "Dirección"], ["municipioDireccion", "Municipio de la dirección"], ["barrio", "Barrio"],
+  ["tipoSangre", "Tipo de sangre"], ["estadoCivil", "Estado civil"]
+];
+const fechaVista = v => String(v || "").replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$3/$2/$1");
+function fichaFamiliar(f, i){
+  const acu = f.acudiente === "SI";
+  return '<div class="ficha' + (acu ? " acu" : "") + '"><div class="ficha-cab"><span>Familiar ' + (i + 1) + '</span>' + (acu ? '<span class="chip">Acudiente</span>' : '<span class="chip gris">No es acudiente</span>') + '</div>' +
+    '<div class="ficha-nombre">' + esc(etiquetaFam(f)) + '</div><dl>' +
+    FICHA.map(([k, l]) => {
+      const v = k === "__direccion" ? tipoTitulo(direccionCompleta(f), "lugar") : k === "fechaNacimiento" ? fechaVista(f[k]) : f[k];
+      return '<div><dt>' + l + '</dt><dd>' + (v ? esc(v) : '<span class="vacio-dato">—</span>') + '</dd></div>';
+    }).join("") + '</dl></div>';
+}
+function pintarResumen(){
+  $("resEst").innerHTML = '<button class="editar" data-ed="2">Editar</button>' + resumenEstHTML(S.estudiantes);
+  const orden = S.familiares.map((f, i) => [f, i]).sort((a, b) => (b[0].acudiente === "SI") - (a[0].acudiente === "SI"));
+  $("resFam").innerHTML = '<button class="editar" data-ed="3">Editar</button><h3>Ficha de los familiares</h3>' +
+    '<p class="hint" style="margin:-4px 0 12px">Primero aparece el acudiente. Revise que todos los datos estén bien escritos.</p>' +
+    orden.map(([f, i]) => fichaFamiliar(f, i)).join("");
+  document.querySelectorAll("[data-ed]").forEach(b => b.onclick = () => irA(+b.dataset.ed));
+  $("chkConfirma").checked = false; mostrarError("errEnviar", "");
+}
+
+$("btnEnviar").addEventListener("click", async () => {
+  if (!$("chkConfirma").checked) { mostrarError("errEnviar", "Marque la casilla para confirmar que la información es correcta."); return; }
+  mostrarError("errEnviar", "");
+  const b = $("btnEnviar"); b.disabled = true; b.textContent = "Enviando…";
+  try {
+    if (!S.familiares.some(f => f.acudiente === "SI")) { mostrarError("errEnviar", "Ningún familiar está marcado como acudiente. Vuelva a «Familiares» y marque al menos uno."); return; }
+    // Solo los campos del formato Q10; la dirección va completa en una sola celda
+    const familiares = S.familiares.map(f => {
+      const o = {}; CAMPOS.forEach(c => { if (c.k && !c.extra) o[c.k] = FORMATO[c.k] ? tipoTitulo(f[c.k], FORMATO[c.k]) : (f[c.k] || ""); });
+      o.direccion = tipoTitulo(direccionCompleta(f), "lugar");
+      if (o.email) o.email = o.email.toLowerCase();
+      return o;
+    });
+    const r = await api("registrar", { autorizacion: true, estudiantes: S.estudiantes.map(e => e.novedad ? { ref: e.ref, novedad: e.novedad } : e.ref), familiares });
+    $("codigo").textContent = r.codigo;
+    $("codigoFecha").textContent = "Registrado el " + r.fecha.replace(/^(\d{4})-(\d{2})-(\d{2})/, "$3/$2/$1");
+    $("resFinal").innerHTML = resumenEstHTML(S.estudiantes) +
+      '<h3 style="margin-top:16px">Familiares registrados</h3>' + S.familiares.map((f, i) =>
+        '<div class="item"><b>' + esc(etiquetaFam(f)) + '</b>' + (f.acudiente === "SI" ? '<span class="chip">Acudiente</span>' : '') + '<br>' + esc(f.parentesco) + ' · Doc. ' + esc(f.numeroDocumento) + '</div>').join("");
+    borrar();
+    irA("vListo");
+  } catch (e) {
+    mostrarError("errEnviar", e.message);
+  } finally { b.disabled = false; b.textContent = "Confirmar y enviar"; }
+});
+</script>
+</body>
+</html>

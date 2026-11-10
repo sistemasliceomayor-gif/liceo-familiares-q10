@@ -1,0 +1,96 @@
+/* Estilos compartidos — misma línea gráfica del aplicativo de ceremonias 2026 */
+:root{
+  --verde-900:#0a4a2d; --verde-800:#0D6B3E; --verde-700:#12824c; --verde-100:#e2f0e7;
+  --dorado:#F2D48A; --marron:#8A5A2B; --crema:#FBF8F1; --crema-2:#F1EADA;
+  --tinta:#1C1C1A; --tinta-suave:#4b4b47; --rojo:#c23b3b; --rojo-100:#fbe9e9;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:"Montserrat",-apple-system,"Segoe UI",sans-serif;
+  background:var(--crema);
+  color:var(--tinta);
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  -webkit-text-size-adjust:100%;
+}
+button{font-family:inherit;}
+a{color:var(--verde-800);}
+
+/* Encabezado institucional */
+.cabecera{
+  background:var(--verde-800);
+  color:#fff;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.cabecera img{width:54px;height:54px;flex:0 0 auto;}
+.cabecera .t{font-size:12.5px;font-weight:600;line-height:1.35;}
+.cabecera .t b{display:block;font-size:15.5px;}
+
+/* Botones */
+.cta{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;
+  padding:16px 22px;
+  border-radius:14px;
+  background:linear-gradient(90deg, var(--marron), var(--dorado));
+  color:#241a08;
+  font-weight:700;
+  font-size:16px;
+  border:none;
+  cursor:pointer;
+  text-decoration:none;
+}
+.cta:disabled{opacity:.6;cursor:not-allowed;}
+.cta:focus-visible,.btn-sec:focus-visible{outline:3px solid var(--verde-700);outline-offset:2px;}
+.btn-sec{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:12px 18px;
+  border-radius:12px;
+  background:#fff;
+  border:1.5px solid var(--crema-2);
+  color:var(--tinta);
+  font-weight:600;
+  font-size:14px;
+  cursor:pointer;
+}
+.btn-sec.verde{border-color:var(--verde-700);color:var(--verde-800);}
+.btn-sec.peligro{border-color:#e3b9b9;color:#7a2323;}
+.btn-sec:disabled{opacity:.55;cursor:not-allowed;}
+
+/* Campos */
+label{display:block;font-size:13.5px;font-weight:600;margin:14px 0 6px;}
+label .req{color:var(--rojo);}
+input[type=text],input[type=tel],input[type=email],input[type=date],input[type=password],input[type=search],select,textarea{
+  width:100%;
+  padding:13px 14px;
+  border-radius:10px;
+  border:1.5px solid var(--crema-2);
+  background:#fff;
+  font-family:inherit;
+  font-size:16px;           /* 16px evita el zoom automático en iPhone */
+  color:var(--tinta);
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--verde-700);border-color:var(--verde-700);}
+input.invalido,select.invalido{border-color:var(--rojo);background:#fffafa;}
+.hint{font-size:12px;color:var(--tinta-suave);margin-top:5px;line-height:1.45;}
+.err-campo{font-size:12px;color:#a02828;font-weight:600;margin-top:5px;}
+.err-campo:empty{display:none;}
+
+.alerta{
+  border-radius:10px;padding:12px 14px;font-size:13.5px;line-height:1.5;margin:14px 0;
+  background:var(--rojo-100);color:#7a2323;
+}
+.alerta.info{background:var(--verde-100);color:var(--verde-900);}
+.alerta.aviso{background:#fdf3dc;color:#6b4a14;}
+.alerta:empty{display:none;}
+
+.copyright{
+  color:var(--tinta-suave);
+  font-size:11px;line-height:1.6;text-align:center;
+  max-width:520px;margin:30px auto 0;padding:0 16px;
+}
+.oculto{display:none !important;}

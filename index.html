@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Actualización de datos de familiares 2027 — I.E. Liceo Mayor de Soledad</title>
+<link rel="icon" href="assets/escudo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css">
+<style>
+  body{background:var(--verde-900);color:#fff;}
+  .hero{
+    min-height:100svh;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    background-image:
+      linear-gradient(180deg, rgba(10,74,45,.35) 0%, rgba(10,74,45,.6) 50%, rgba(9,46,29,.97) 100%),
+      url("assets/fondo.jpg");
+    background-size:cover;background-position:center top;
+  }
+  .contenido{max-width:560px;width:100%;margin:0 auto;padding:28px 22px 34px;}
+  .marca{display:flex;align-items:center;gap:14px;margin-bottom:26px;}
+  .marca img{width:72px;height:72px;filter:drop-shadow(0 4px 10px rgba(0,0,0,.35));}
+  .marca b{display:block;font-size:16px;}
+  .marca span{font-size:12.5px;color:var(--dorado);font-weight:600;}
+  h1{font-size:30px;line-height:1.15;font-weight:800;margin:0 0 12px;}
+  h1 em{font-style:normal;color:var(--dorado);}
+  p.intro{font-size:15px;line-height:1.6;color:rgba(255,255,255,.88);margin:0 0 20px;}
+  .estado{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+    border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;margin-bottom:22px;
+  }
+  .estado i{width:9px;height:9px;border-radius:50%;background:#bbb;}
+  .estado.abierto i{background:#57d68d;box-shadow:0 0 0 4px rgba(87,214,141,.25);}
+  .estado.cerrado i{background:#e57b7b;}
+  .pasos{list-style:none;margin:0 0 24px;padding:0;display:grid;gap:10px;}
+  .pasos li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.9);}
+  .pasos b{flex:0 0 26px;height:26px;border-radius:50%;background:var(--dorado);color:#241a08;display:flex;align-items:center;justify-content:center;font-size:13px;}
+  .funcionarios{display:block;text-align:center;margin-top:16px;color:rgba(255,255,255,.7);font-size:13px;font-weight:600;}
+  .copyright{color:rgba(255,255,255,.45);}
+  .soporte-portada{text-align:center;font-size:12.5px;color:rgba(255,255,255,.75);margin:14px 0 0;}
+  .soporte-portada a{color:var(--dorado);font-weight:700;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="contenido">
+    <div class="marca">
+      <img src="assets/escudo.png" alt="Escudo I.E. Liceo Mayor de Soledad">
+      <div><b>I.E. Liceo Mayor de Soledad</b><span>Rafael U. Lafaurie Rivera</span></div>
+    </div>
+
+    <h1>Actualización de datos de <em>familiares y acudientes 2027</em></h1>
+    <p class="intro">Estimada familia: estamos actualizando en la plataforma Q10 la información de padres, madres y acudientes de nuestros estudiantes. Le tomará unos 5 minutos.</p>
+
+    <div class="estado" id="estado"><i></i><span>Consultando disponibilidad…</span></div>
+
+    <ol class="pasos">
+      <li><b>1</b><span>Tenga a mano el <strong>número de documento</strong> de su hijo(a) y los documentos de los familiares que va a registrar.</span></li>
+      <li><b>2</b><span>En un solo registro puede incluir <strong>a todos sus hijos</strong> en el colegio y <strong>hasta 4 familiares</strong> (mamá, papá, acudiente…).</span></li>
+      <li><b>3</b><span>Al final recibirá un <strong>código de registro</strong>. Guárdelo como constancia.</span></li>
+    </ol>
+
+    <a class="cta" id="btnIniciar" href="registro.html">Registrar familiares</a>
+    <a class="funcionarios" href="login.html">Acceso de funcionarios →</a>
+    <p class="soporte-portada">¿Dudas? Soporte técnico: <a id="correoSoporte" href="mailto:sistemasliceomayor@gmail.com">sistemasliceomayor@gmail.com</a></p>
+  </div>
+  <p class="copyright">© 2026 Desarrollado por el Departamento de Sistemas — I.E. Liceo Mayor de Soledad "Rafael U. Lafaurie Rivera". Todos los derechos reservados.</p>
+</div>
+
+<script src="config.js"></script>
+<script>
+(async () => {
+  const el = document.getElementById("estado");
+  const txt = el.querySelector("span");
+  try {
+    const r = await api("estado");
+    if (r.soporte) { const a = document.getElementById("correoSoporte"); a.textContent = r.soporte; a.href = "mailto:" + r.soporte; }
+    if (r.abierto) {
+      el.className = "estado abierto";
+      txt.textContent = r.cierre ? "Registro abierto hasta el " + r.cierre : "Registro abierto";
+    } else {
+      el.className = "estado cerrado";
+      txt.textContent = "El registro no está abierto en este momento";
+    }
+  } catch (e) {
+    el.className = "estado";
+    txt.textContent = e.message;
+  }
+})();
+</script>
+</body>
+</html>
