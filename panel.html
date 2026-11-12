@@ -118,6 +118,7 @@
   <button data-tab="faltantes">Estudiantes sin actualización</button>
   <button data-tab="registros" id="tabRegistros">Registros</button>
   <button data-tab="novedades" id="tabNovedades">Novedades de documento <span class="badge oculto" id="badgeNov"></span></button>
+  <button data-tab="datosest" class="oculto" id="tabDatosEst">Datos de estudiantes</button>
   <button data-tab="exportar" class="oculto" id="tabExportar">Exportar a Q10</button>
 </div></nav>
 
@@ -203,6 +204,24 @@
     </div>
   </section>
 
+  <!-- DATOS DE ESTUDIANTES (reporte adicional para la ficha de matrícula) -->
+  <section id="t-datosest" class="oculto">
+    <div class="caja">
+      <h2>Datos de los estudiantes para la ficha de matrícula</h2>
+      <p class="nota" style="margin:0 0 12px">Datos que los padres diligenciaron de cada hijo: correo, teléfono, barrio, lugar de nacimiento, municipio de expedición, tipo de sangre y EPS. <b>No van en el Formato Q10 de familiares</b>: se cargan uno a uno en la ficha del estudiante en Q10. Un estudiante por fila (si hay dos registros, sale el más reciente). <b>Contiene datos de salud de menores: no los comparta.</b></p>
+      <div class="herramientas">
+        <select id="dJornada" aria-label="Jornada"><option value="">Todas las jornadas</option></select>
+        <select id="dGrado" aria-label="Grado"><option value="">Todos los grados</option></select>
+        <select id="dCurso" aria-label="Curso"><option value="">Todos los cursos</option></select>
+        <input type="search" id="dBuscar" placeholder="Buscar por nombre o documento">
+        <button class="btn btn-grande" id="btnExpDatosEst">⬇ Descargar datos en Excel</button>
+      </div>
+      <p class="nota" id="dCuenta">Cargando…</p>
+      <div class="tabla-wrap"><table><thead><tr><th>Estudiante</th><th>Correo / Teléfono</th><th>Barrio</th><th>Lugar de nacimiento</th><th>Mun. expedición</th><th>Sangre</th><th>EPS</th></tr></thead><tbody id="tablaDatosEst"></tbody></table></div>
+      <div class="mas"><button class="btn-sec oculto" id="masDatosEst">Ver más</button></div>
+    </div>
+  </section>
+
   <!-- EXPORTAR -->
   <section id="t-exportar" class="oculto">
     <div class="caja">
@@ -271,6 +290,8 @@ async function cargar(){
     pe.className = "pill " + (D.config.abierto ? "abierto" : "cerrado");
     pe.textContent = D.config.abierto ? "Registro abierto" + (D.config.cierre ? " hasta " + D.config.cierre : "") : "Registro cerrado";
     $("tabExportar").classList.toggle("oculto", !puede("exportar"));
+    $("tabDatosEst").classList.toggle("oculto", !puede("datosEstudiantes"));
+    DE = null; if (!$("t-datosest").classList.contains("oculto")) cargarDatosEst();
     $("tabRegistros").classList.toggle("oculto", !puede("verRegistros"));
     $("tabNovedades").classList.toggle("oculto", !D.novedades);
     $("cajaAlertas").classList.toggle("oculto", !puede("verRegistros"));
@@ -286,7 +307,63 @@ async function cargar(){
 function mostrarTab(t){
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("activo", b.dataset.tab === t));
   document.querySelectorAll("main > section").forEach(s => s.classList.toggle("oculto", s.id !== "t-" + t));
+  if (t === "datosest" && !DE) cargarDatosEst();
 }
+
+/* ---------- datos de estudiantes (reporte adicional) ---------- */
+let DE = null, limDE = 200;
+async function cargarDatosEst(){
+  $("dCuenta").textContent = "Cargando…"; $("tablaDatosEst").innerHTML = "";
+  try {
+    const r = await api("datosEstudiantes", { token });
+    DE = r.filas.map(x => ({ c: x[0], f: x[1], d: x[2], n: x[3], j: x[4], g: x[5], cu: x[6], email: x[7], tel: x[8], barrio: x[9], nac: x[10], exp: x[11], sangre: x[12], eps: x[13] }));
+    llenarFiltrosDE(); pintarDatosEst();
+  } catch (e) { manejarError(e); $("dCuenta").textContent = ""; }
+}
+function llenarFiltrosDE(){
+  const j = $("dJornada").value, g = $("dGrado").value, cu = $("dCurso").value;
+  const opts = (sel, vals, etq, actual) => { sel.innerHTML = '<option value="">' + etq + '</option>' + vals.map(v => '<option' + (v === actual ? " selected" : "") + '>' + esc(v) + '</option>').join(""); };
+  opts($("dJornada"), [...new Set(DE.map(e => e.j))].sort(cmp), "Todas las jornadas", j);
+  opts($("dGrado"), [...new Set(DE.filter(e => !j || e.j === j).map(e => e.g))].sort(cmpGrado), "Todos los grados", g);
+  opts($("dCurso"), [...new Set(DE.filter(e => (!j || e.j === j) && (!g || e.g === g)).map(cursoEt))].sort(cmp), "Todos los cursos", cu);
+}
+function datosEstFiltrados(){
+  const j = $("dJornada").value, g = $("dGrado").value, cu = $("dCurso").value, q = $("dBuscar").value.trim().toLowerCase();
+  return (DE || []).filter(e => (!j || e.j === j) && (!g || e.g === g) && (!cu || cursoEt(e) === cu) && (!q || e.d.toLowerCase().includes(q) || e.n.toLowerCase().includes(q)))
+    .sort((a, b) => cmp(a.j, b.j) || cmpGrado(a.g, b.g) || cmp(a.cu, b.cu) || cmp(a.n, b.n));
+}
+function filtroDETexto(){
+  return [$("dJornada").value && "Jornada " + $("dJornada").value, $("dGrado").value && "Grado " + $("dGrado").value, $("dCurso").value && "Curso " + $("dCurso").value].filter(Boolean).join(" · ") || "Todo el colegio";
+}
+function pintarDatosEst(){
+  if (!DE) return;
+  const lista = datosEstFiltrados();
+  $("dCuenta").innerHTML = "<b>" + lista.length.toLocaleString("es-CO") + "</b> estudiantes con datos diligenciados · " + esc(filtroDETexto()) + ".";
+  $("tablaDatosEst").innerHTML = lista.slice(0, limDE).map(e => '<tr><td><b>' + esc(e.n) + '</b><div class="s">Doc. ' + esc(e.d) + ' · ' + esc(e.j) + ' · Grado ' + esc(e.g) + ' · ' + esc(e.cu) + '</div></td>' +
+    '<td>' + esc(e.email) + '<div class="s">' + esc(e.tel) + '</div></td><td>' + esc(e.barrio) + '</td><td>' + esc(e.nac) + '</td><td>' + esc(e.exp) + '</td><td>' + esc(e.sangre) + '</td><td>' + esc(e.eps) + '</td></tr>').join("") ||
+    '<tr><td colspan="7" class="s">Aún no hay datos con este filtro.</td></tr>';
+  $("masDatosEst").classList.toggle("oculto", lista.length <= limDE);
+}
+["dJornada", "dGrado", "dCurso"].forEach(id => $(id).onchange = () => { limDE = 200; llenarFiltrosDE(); pintarDatosEst(); });
+$("dBuscar").oninput = () => { limDE = 200; pintarDatosEst(); };
+$("masDatosEst").onclick = () => { limDE += 200; pintarDatosEst(); };
+$("btnExpDatosEst").onclick = () => {
+  if (!DE) return;
+  const lista = datosEstFiltrados(), hoy = new Date().toISOString().slice(0, 10);
+  const aoa = [
+    ["Datos de estudiantes para la ficha de matrícula 2027 — I.E. Liceo Mayor de Soledad"],
+    ["Filtro: " + filtroDETexto() + " · Descargado el " + hoy.split("-").reverse().join("/") + " · " + lista.length + " estudiantes"],
+    ["Contiene datos personales y de salud de menores de edad (Ley 1581 de 2012). Uso exclusivo de Secretaría. No compartir."],
+    [],
+    ["Documento", "Estudiante", "Jornada", "Grado", "Curso", "Correo electrónico", "Teléfono", "Barrio", "Lugar de nacimiento", "Municipio de expedición del documento", "Tipo de sangre", "EPS", "Fecha de registro", "Código registro", "¿Cargado en Q10?"]
+  ].concat(lista.map(e => [e.d, e.n, e.j, e.g, e.cu, e.email, e.tel, e.barrio, e.nac, e.exp, e.sangre, e.eps, e.f, e.c, ""]));
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"] = [{ wch: 14 }, { wch: 40 }, { wch: 10 }, { wch: 11 }, { wch: 8 }, { wch: 30 }, { wch: 13 }, { wch: 20 }, { wch: 22 }, { wch: 22 }, { wch: 14 }, { wch: 26 }, { wch: 18 }, { wch: 12 }, { wch: 14 }];
+  ws["!autofilter"] = { ref: "A5:O" + (5 + lista.length) };
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Datos estudiantes");
+  XLSX.writeFile(wb, "Datos estudiantes ficha matricula - " + filtroDETexto().replace(/[·]/g, "-").replace(/\s+/g, " ") + " - " + hoy + ".xlsx");
+  api("datosEstudiantes", { token, registrarDescarga: true, detalle: filtroDETexto() + " · " + lista.length + " filas" }).catch(() => {});
+};
 document.querySelectorAll("#tabs button").forEach(b => b.onclick = () => mostrarTab(b.dataset.tab));
 
 /* ---------- resumen ---------- */
