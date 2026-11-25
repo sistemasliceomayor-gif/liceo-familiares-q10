@@ -124,6 +124,26 @@
   .q-final input{width:100%;padding:10px 12px;font-size:14px;margin:6px 0 12px;border:1.5px solid var(--crema-2);border-radius:8px;}
   .q-final .acciones{display:flex;gap:10px;flex-wrap:wrap;}
   .btn-ok{background:var(--verde-800);color:#fff;border:none;border-radius:10px;padding:12px 18px;font-weight:800;font-size:14.5px;cursor:pointer;}
+  .q-final.q-pend{border:2px solid #b07a1e;background:#fffaf0;}
+  .q-final.q-hecho{border:2px solid var(--verde-800);background:#e9f6ee;text-align:center;}
+  .q-final .q-tit{font-weight:800;font-size:16px;color:#1f1d1a;margin-bottom:8px;}
+  .q-hecho .q-tit{color:var(--verde-800);font-size:18px;}
+  .q-hecho .q-ico{font-size:40px;line-height:1;margin-bottom:6px;}
+  .q-hecho .q-det{font-size:13.5px;color:#4b4b47;margin-bottom:4px;}
+  .q-avance{margin:12px 0 4px;text-align:left;}
+  .q-av-txt{font-size:13px;color:#2b2925;margin-bottom:6px;}
+  .q-barra{height:10px;background:#e4ddcc;border-radius:99px;overflow:hidden;}
+  .q-barra span{display:block;height:100%;background:var(--verde-800);border-radius:99px;transition:width .4s;}
+  .q-pasos{margin:0 0 12px 20px;padding:0;font-size:13.5px;line-height:1.6;}
+  .q-check{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1.5px solid #b07a1e;border-radius:10px;padding:12px;font-size:14px;cursor:pointer;}
+  .q-check input{width:22px;height:22px;flex:none;margin:0;accent-color:var(--verde-800);}
+  .btn-ok:disabled{background:#b9b3a6;cursor:not-allowed;}
+  .btn-ancho{flex:1 1 260px;font-size:15.5px;padding:14px 18px;}
+  .q-ayuda{font-size:12.5px;color:#8a5a2b;margin:8px 0 0;}
+  .q-desm{margin-top:14px;text-align:left;font-size:13px;}
+  .q-desm summary{cursor:pointer;color:#6b665c;text-decoration:underline;}
+  .q-desm label{display:block;margin:10px 0 4px;font-weight:700;font-size:12.5px;}
+  .q-desm .btn-sec2{margin-top:8px;}
   .btn-sec2{background:#fff;border:1.5px solid var(--crema-2);border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer;}
   @media (max-width:640px){ .q-campo{grid-template-columns:1fr auto;} .q-campo .et{grid-column:1 / -1;} }
   .anular{margin-top:18px;padding-top:16px;border-top:1px solid var(--crema-2);}
@@ -460,6 +480,12 @@ function campoQ(et, v, ayuda, exige){
        : '<div class="v vacio">Sin dato · dejar como está</div><span></span>') + '</div>';
 }
 const esCelular = t => /^3\d{9}$/.test(String(t || ""));
+function avanceCurso(){
+  const con = FQ.fichas.filter(x => x.familiares.length), hechos = con.filter(x => x.cargue && x.cargue.estado === "Cargado").length;
+  const pct = con.length ? Math.round(hechos * 100 / con.length) : 0;
+  return '<div class="q-avance"><div class="q-av-txt">Avance de este curso: <b>' + hechos + ' de ' + con.length + '</b> estudiantes registrados en Q10 · <b>' + pct + ' %</b></div>' +
+    '<div class="q-barra" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><span style="width:' + pct + '%"></span></div></div>';
+}
 function abrirFicha(i){
   const f = FQ.fichas[i], d = f.datos || {}, c = f.cargue && f.cargue.estado === "Cargado";
   let nombreDoc = ""; try { nombreDoc = localStorage.getItem("fq10_docente") || ""; } catch (e) {}
@@ -487,10 +513,20 @@ function abrirFicha(i){
         campoQ("Dirección", m.direccion) + campoQ("Lugar de residencia", m.municipioDireccion, "Pegue y elija de la lista") + campoQ("Barrio", m.barrio, "Elija de la lista") +
         '<div class="q-sub">Al asignarlo al estudiante</div>' + campoQ("Parentesco", m.parentesco, "Elija de la lista") +
         '<div class="q-campo"><div class="et">Acudiente</div><div class="v">' + (m.acudiente === "SI" ? "Sí" : "No") + '</div><span></span></div></div>').join("") + '</div>' +
-    '<div class="q-final">' + (c
-      ? '<b>✅ Registrado en Q10</b> por ' + esc(f.cargue.docente) + ' el ' + esc(fechaCorta(f.cargue.fecha)) + '.<label style="display:block;margin-top:10px;font-size:12.5px;font-weight:700">Su nombre (para desmarcar)</label><input id="qDocente" maxlength="60" value="' + esc(nombreDoc) + '" placeholder="Nombre y apellido del docente"><div class="acciones"><button class="btn-sec2" id="qDesmarcar">Desmarcar (no se cargó bien)</button>'
-      : '<label style="font-size:12.5px;font-weight:700">Su nombre (queda como constancia)</label><input id="qDocente" maxlength="60" value="' + esc(nombreDoc) + '" placeholder="Nombre y apellido del docente"><div class="acciones"><button class="btn-ok" id="qMarcar">✅ Datos registrados en Q10</button>') +
-      (i < FQ.fichas.length - 1 ? '<button class="btn-sec2" id="qSiguiente">Siguiente estudiante →</button>' : '') + '</div><div class="err-campo" id="qErr" style="color:#a02828;font-size:13px;margin-top:8px"></div></div>';
+    (c
+      ? '<div class="q-final q-hecho" role="status"><div class="q-ico" aria-hidden="true">✅</div><div class="q-tit">¡Listo! ' + esc(f.nombre) + ' quedó REGISTRADO EN Q10</div>' +
+        '<div class="q-det">Marcado por <b>' + esc(f.cargue.docente) + '</b> el ' + esc(fechaCorta(f.cargue.fecha)) + '.</div>' + avanceCurso() +
+        '<div class="acciones">' + (i < FQ.fichas.length - 1 ? '<button class="btn-ok btn-ancho" id="qSiguiente">Siguiente estudiante →</button>' : '<button class="btn-ok btn-ancho" id="qCerrarFin">Terminé este curso · Cerrar</button>') + '</div>' +
+        '<details class="q-desm"><summary>¿Se marcó por error o no quedó bien en Q10?</summary><label for="qDocente">Su nombre</label><input id="qDocente" maxlength="60" value="' + esc(nombreDoc) + '" placeholder="Nombre y apellido del docente"><button class="btn-sec2" id="qDesmarcar">Desmarcar (volver a pendiente)</button></details>'
+      : '<div class="q-final q-pend"><div class="q-tit">⏳ Último paso: confirme que guardó los datos en Q10</div>' +
+        '<ol class="q-pasos"><li>Copió en Q10 los datos del estudiante.</li><li>Asignó en Q10 ' + (f.familiares.length === 1 ? 'a su familiar' : 'a sus <b>' + f.familiares.length + ' familiares</b>') + ' (con parentesco y acudiente).</li><li>Pulsó <b>Guardar</b> en Q10 y no salió ningún error.</li></ol>' +
+        '<label class="q-check"><input type="checkbox" id="qConfirmo"> <span>Sí, ya guardé en Q10 los datos de <b>' + esc(f.nombre) + '</b>' + (f.familiares.length === 1 ? ' y su familiar' : ' y sus ' + f.familiares.length + ' familiares') + '.</span></label>' +
+        '<label for="qDocente" style="display:block;margin-top:12px;font-size:12.5px;font-weight:700">Su nombre (queda como constancia)</label><input id="qDocente" maxlength="60" value="' + esc(nombreDoc) + '" placeholder="Nombre y apellido del docente">' +
+        '<div class="acciones"><button class="btn-ok btn-ancho" id="qMarcar" disabled>✅ Confirmar: datos registrados en Q10</button>' +
+        (i < FQ.fichas.length - 1 ? '<button class="btn-sec2" id="qSiguiente">Saltar por ahora →</button>' : '') + '</div>' +
+        '<p class="q-ayuda" id="qAyuda">Marque la casilla de arriba para activar el botón.</p>' +
+        '<p class="q-ayuda" style="color:#4b4b47">Si no confirma aquí, este estudiante seguirá contando como <b>pendiente</b> en el avance del curso.</p>' + avanceCurso()) +
+      '<div class="err-campo" id="qErr" style="color:#a02828;font-size:13px;margin-top:8px"></div></div>';
   $("modalCuerpo").innerHTML = h; $("modal").classList.remove("oculto"); $("modal").scrollTop = 0;
   $("modalCuerpo").querySelectorAll(".q-copiar").forEach(b => b.onclick = () => copiarQ(b));
   const marcar = async valor => {
@@ -505,7 +541,13 @@ function abrirFicha(i){
       pintarCargue(); abrirFicha(i);
     } catch (e) { btn.disabled = false; $("qErr").textContent = e.message; if (/sesión expiró/i.test(e.message)) manejarError(e); }
   };
-  if ($("qMarcar")) $("qMarcar").onclick = () => marcar(true);
+  if ($("qMarcar")) {
+    const act = () => { const ok = $("qConfirmo").checked; $("qMarcar").disabled = !ok; $("qAyuda").classList.toggle("oculto", ok); };
+    $("qConfirmo").onchange = act; act();
+    $("qMarcar").onclick = () => marcar(true);
+  }
+  if ($("qCerrarFin")) $("qCerrarFin").onclick = () => cerrarModal();
+  if (c && $("qSiguiente")) $("qSiguiente").focus();
   if ($("qDesmarcar")) $("qDesmarcar").onclick = () => { if (confirm("¿Desmarcar a " + f.nombre + "? Quedará como pendiente.")) marcar(false); };
   if ($("qSiguiente")) $("qSiguiente").onclick = () => { let k = i + 1; while (k < FQ.fichas.length && !FQ.fichas[k].familiares.length) k++; if (k < FQ.fichas.length) abrirFicha(k); else cerrarModal(); };
 }
@@ -581,9 +623,9 @@ $("btnHibrido").onclick = async () => {
       [ambito + " · Descargado el " + hoy + " · " + nEst + " estudiantes · " + r.filas.length + " filas (una por familiar)"],
       ["Contiene datos personales y de salud de menores de edad (Ley 1581 de 2012). Uso institucional exclusivo. No compartir."], [], r.encabezados].concat(r.filas);
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws["!cols"] = r.encabezados.map(h => ({ wch: /Estudiante$|Dirección|Correo|Email/.test(h) ? 30 : /Documento|Número|Código|Fecha|Teléfono|Celular|Cargado por/.test(h) ? 15 : 12 }));
+    ws["!cols"] = r.encabezados.map(h => ({ wch: /^(Nombres|Apellidos)$/.test(h) ? 24 : /^(Edad|Sexo)$/.test(h) ? 10 : /Dirección|Correo|Email/.test(h) ? 30 : /Documento|Número|Código|Fecha|Teléfono|Celular|Cargado por/.test(h) ? 15 : 12 }));
     ws["!autofilter"] = { ref: "A5:" + XLSX.utils.encode_col(r.encabezados.length - 1) + (5 + r.filas.length) };
-    ws["!freeze"] = { xSplit: 5, ySplit: 5 };
+    ws["!freeze"] = { xSplit: 6, ySplit: 5 };
     const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Reporte Híbrido");
     XLSX.writeFile(wb, "Reporte Hibrido - " + ambito.replace(/[·]/g, "-").replace(/\s+/g, " ") + " - " + new Date().toISOString().slice(0, 10) + ".xlsx");
   } catch (e) { $("hErr").textContent = e.message; $("hErr").classList.remove("oculto"); if (/sesión expiró/i.test(e.message)) manejarError(e); }

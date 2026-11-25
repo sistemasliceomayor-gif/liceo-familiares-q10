@@ -37,6 +37,8 @@
 
   .tarjeta{background:#fff;border:1.5px solid var(--crema-2);border-radius:16px;padding:18px;margin-bottom:16px;}
   .autorizacion{font-size:13.5px;line-height:1.65;color:var(--tinta-suave);}
+  .check-nt{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;color:var(--tinta-suave,#555);margin-top:6px;cursor:pointer;}
+  .check-nt input{width:18px;height:18px;margin:0;}
   .check{display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.5;font-weight:600;margin-top:14px;cursor:pointer;}
   .check input{width:22px;height:22px;flex:0 0 auto;margin-top:1px;accent-color:var(--verde-800);}
 
@@ -271,7 +273,7 @@
     <h1>Datos de los familiares</h1>
     <div class="vinculados" id="vinculados"></div>
     <div class="resumen-err oculto" id="resumenErr" role="alert"></div>
-    <p class="sub">Diligencie los datos de los familiares (mamá, papá, abuelos…), máximo 4. Son los mismos datos que pide la plataforma Q10. <b>Solo uno puede ser el acudiente</b>: la persona responsable del estudiante ante el colegio. Los campos con <span style="color:var(--rojo)">*</span> son obligatorios.</p>
+    <p class="sub">Diligencie los datos de los familiares (mamá, papá, abuelos…), máximo 4. Son los mismos datos que pide la plataforma Q10. <b>Solo uno puede ser el acudiente</b>: la persona responsable del estudiante ante el colegio. <b>Todos los campos son obligatorios.</b> Si el familiar no tiene segundo nombre, segundo apellido, teléfono fijo o correo, marque la casilla «No tiene…» de ese campo.</p>
     <div id="familiares"></div>
     <button class="agregar" id="btnAgregarFam">+ Agregar otro familiar</button>
     <div class="alerta oculto" id="errP3"></div>
@@ -335,29 +337,29 @@ const LISTAS = {
 const CAMPOS = [
   { sec: "Datos personales" },
   { k:"primerNombre", l:"Primer Nombre", req:true, max:40 },
-  { k:"segundoNombre", l:"Segundo Nombre", max:40 },
+  { k:"segundoNombre", noTiene:"No tiene segundo nombre", l:"Segundo Nombre", req:true, max:40 },
   { k:"primerApellido", l:"Primer Apellido", req:true, max:40 },
-  { k:"segundoApellido", l:"Segundo Apellido", max:40 },
+  { k:"segundoApellido", noTiene:"No tiene segundo apellido", l:"Segundo Apellido", req:true, max:40 },
   { k:"tipoDocumento", l:"Tipo Documento", req:true, lista:"tipoDocumento", def:"Cédula de ciudadanía" },
   { k:"numeroDocumento", l:"Número Identificación", req:true, re:/^[A-Za-z0-9]{3,20}$/, msg:"Solo números (o letras y números si es pasaporte), sin puntos ni espacios.", modo:"numeric", hint:"Sin puntos ni espacios.", limpiar:/[^A-Za-z0-9]/g },
-  { k:"municipioExpedicion", l:"Municipio de Expedición del Documento", municipio:true, hint:"Si el documento es de otro país, elija «Otro»." },
+  { k:"municipioExpedicion", l:"Municipio de Expedición del Documento", req:true, municipio:true, hint:"Si el documento es de otro país, elija «Otro»." },
   { k:"genero", l:"Género", req:true, lista:"genero", radio:true, ancho:true },
   { k:"fechaNacimiento", l:"Fecha de Nacimiento", req:true, tipo:"date" },
-  { k:"municipioNacimiento", l:"Municipio de Nacimiento", municipio:true, hint:"Si nació en otro país, elija «Otro»." },
+  { k:"municipioNacimiento", l:"Municipio de Nacimiento", req:true, municipio:true, hint:"Si nació en otro país, elija «Otro»." },
   { sec: "Contacto y residencia" },
-  { k:"telefono", l:"Teléfono", re:/^[0-9]{7,10}$/, msg:"Solo números, entre 7 y 10 dígitos.", tipo:"tel", modo:"numeric", hint:"Teléfono fijo (opcional).", limpiar:/[^0-9]/g },
+  { k:"telefono", noTiene:"No tiene teléfono fijo", l:"Teléfono", req:true, re:/^[0-9]{7,10}$/, msg:"Solo números, entre 7 y 10 dígitos.", tipo:"tel", modo:"numeric", hint:"Teléfono fijo. Si no tiene, marque la casilla.", limpiar:/[^0-9]/g },
   { k:"celular", l:"Celular", req:true, re:/^3[0-9]{9}$/, msg:"Debe tener 10 dígitos y empezar por 3.", tipo:"tel", modo:"numeric", hint:"10 dígitos, ej: 3001234567", limpiar:/[^0-9]/g },
-  { k:"email", l:"Email", re:/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, msg:"Escriba un correo válido, ej: nombre@gmail.com", tipo:"email", ancho:true, max:100 },
-  { k:"direccion", l:"Dirección", ancho:true, max:100, hint:"Calle o carrera y número. Ej: Cra 34 # 20-18" },
-  { k:"viveConjunto", l:"¿Vive en conjunto, edificio o apartamento?", extra:true, lista:"sino", radio:true, ancho:true, etq:{ SI:"Sí", NO:"No" }, hint:"Si responde «Sí», le pediremos el nombre del conjunto, la torre y el apartamento o casa." },
-  { k:"conjunto", l:"Conjunto o edificio", extra:true, sub:"viveConjunto", max:60, hint:"Ej: Conjunto Los Robles" },
-  { k:"torre", l:"Torre o bloque", extra:true, sub:"viveConjunto", max:20, hint:"Ej: Torre 3" },
-  { k:"apto", l:"Apartamento o casa #", extra:true, sub:"viveConjunto", max:20, hint:"Ej: Apto 502 o Casa 14" },
-  { k:"municipioDireccion", l:"Municipio de la Dirección", municipio:true },
-  { k:"barrio", l:"Barrio", max:60 },
+  { k:"email", noTiene:"No tiene correo electrónico", l:"Email", req:true, re:/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, msg:"Escriba un correo válido, ej: nombre@gmail.com", tipo:"email", ancho:true, max:100 },
+  { k:"direccion", l:"Dirección", req:true, ancho:true, max:100, hint:"Calle o carrera y número. Ej: Cra 34 # 20-18" },
+  { k:"viveConjunto", l:"¿Vive en conjunto, edificio o apartamento?", req:true, extra:true, lista:"sino", radio:true, ancho:true, etq:{ SI:"Sí", NO:"No" }, hint:"Si responde «Sí», le pediremos el nombre del conjunto, la torre y el apartamento o casa." },
+  { k:"conjunto", l:"Conjunto o edificio", req:true, extra:true, sub:"viveConjunto", max:60, hint:"Ej: Conjunto Los Robles" },
+  { k:"torre", l:"Torre o bloque", req:true, extra:true, sub:"viveConjunto", max:20, hint:"Ej: Torre 3" },
+  { k:"apto", l:"Apartamento o casa #", req:true, extra:true, sub:"viveConjunto", max:20, hint:"Ej: Apto 502 o Casa 14" },
+  { k:"municipioDireccion", l:"Municipio de la Dirección", req:true, municipio:true },
+  { k:"barrio", l:"Barrio", req:true, max:60 },
   { sec: "Otros datos" },
-  { k:"tipoSangre", l:"Tipo de Sangre", lista:"tipoSangre" },
-  { k:"estadoCivil", l:"Estado Civil", lista:"estadoCivil" },
+  { k:"tipoSangre", l:"Tipo de Sangre", req:true, lista:"tipoSangre" },
+  { k:"estadoCivil", l:"Estado Civil", req:true, lista:"estadoCivil" },
   { sec: "Relación con el estudiante" },
   { k:"parentesco", l:"Parentesco", req:true, lista:"parentesco", hint:"¿Qué es este familiar del estudiante? Ej: si es la mamá, elija «Madre».", ancho:true },
   { k:"acudiente", l:"¿Es acudiente del estudiante?", req:true, lista:"acudiente", radio:true, ancho:true, etq:{ SI:"Sí, soy el acudiente", NO:"No" }, hint:"El acudiente es la persona responsable del estudiante ante el colegio. Solo un familiar puede ser el acudiente." }
@@ -758,6 +760,11 @@ function campoHTML(c, i, f){
       ' value="' + esc(v) + '" autocomplete="off">';
   }
   const ocultoSub = c.sub && f[c.sub] !== "SI" ? " oculto" : "";
+  if (c.noTiene) {
+    const nt = f[c.k + "_nt"] === true;
+    if (nt) ctl = ctl.replace("<input ", "<input disabled ");
+    ctl += '<label class="check-nt"><input type="checkbox" id="' + id + '_nt"' + (nt ? " checked" : "") + '> ' + esc(c.noTiene) + '</label>';
+  }
   return '<div class="' + (c.ancho ? "ancho" : "") + (c.sub ? " sub-" + c.sub : "") + ocultoSub + '">' + lab + ctl + (c.hint ? '<div class="hint">' + esc(c.hint) + '</div>' : '') +
     '<div class="err-campo" id="e_' + id + '"></div></div>';
 }
@@ -793,6 +800,12 @@ function pintarFamiliares(){
     S.familiares.splice(i, 1);
     guardar(); pintarFamiliares();
   });
+  // «No tiene…»: deshabilita y vacía el campo; al desmarcar, lo habilita de nuevo
+  cont.querySelectorAll('input[id$="_nt"]').forEach(chk => chk.addEventListener("change", () => {
+    const campo = $(chk.id.slice(0, -3));
+    if (campo) { campo.disabled = chk.checked; if (chk.checked) { campo.value = ""; campo.classList.remove("invalido"); const e = $("e_" + campo.id); if (e) e.textContent = ""; } else campo.focus(); }
+    leerFamiliares(); guardar();
+  }));
   cont.querySelectorAll('input[name$="_viveConjunto"]').forEach(r => r.addEventListener("change", () => {
     const i = +r.name.slice(1, r.name.indexOf("_"));
     $("fam" + i).querySelectorAll(".sub-viveConjunto").forEach(d => d.classList.toggle("oculto", r.value !== "SI"));
@@ -847,6 +860,7 @@ function leerFamiliares(){
     const id = "f" + i + "_" + c.k;
     if (c.radio) { const r = document.querySelector('input[name="' + id + '"]:checked'); f[c.k] = r ? r.value : ""; return; }
     const el = $(id); if (!el) return;
+    if (c.noTiene) { const nt = $(id + "_nt"); f[c.k + "_nt"] = !!(nt && nt.checked); if (f[c.k + "_nt"]) { f[c.k] = ""; return; } }
     if (c.municipio && el.value === OTRO) { const o = $(id + "_otro"); f[c.k] = o.value.replace(/\s+/g, " ").trim(); f[c.k + "_otro"] = true; return; }
     f[c.k] = el.value.replace(/\s+/g, " ").trim(); delete f[c.k + "_otro"];
   }));
@@ -868,8 +882,10 @@ function validarFamiliares(){
     const id = "f" + i + "_" + c.k;
     let v = f[c.k] || "", msg = "";
     if (c.limpiar) { v = v.replace(c.limpiar, ""); f[c.k] = v; const el=$(id); if (el) el.value = v; }
+    if (c.sub && f[c.sub] !== "SI") { const e = $("e_" + id); if (e) e.textContent = ""; return; }   // campo oculto: no aplica
+    if (!v && c.noTiene && f[c.k + "_nt"]) { const e = $("e_" + id); if (e) e.textContent = ""; const el = $(id); if (el) el.classList.remove("invalido"); return; }
     if (!v) {
-      if (c.req) msg = c.radio || c.lista ? "Seleccione una opción." : "Este dato es obligatorio.";
+      if (c.req) msg = c.radio || c.lista || c.municipio ? "Seleccione una opción." : c.noTiene ? "Escríbalo o marque «" + c.noTiene + "»." : "Este dato es obligatorio.";
       if (c.municipio && $(id) && $(id).value === OTRO) msg = "Escriba la ciudad o municipio y el país.";
     }
     else if (c.re && !c.re.test(v)) msg = c.msg;
@@ -978,7 +994,7 @@ $("btnEnviar").addEventListener("click", async () => {
     if (incompleto >= 0) { mostrarError("errEnviar", "Faltan datos de " + S.estudiantes[incompleto].nombre + ". Pulse «Editar» en su ficha."); return; }
     // Solo los campos del formato Q10; la dirección va completa en una sola celda
     const familiares = S.familiares.map(f => {
-      const o = {}; CAMPOS.forEach(c => { if (c.k && !c.extra) o[c.k] = FORMATO[c.k] ? tipoTitulo(f[c.k], FORMATO[c.k]) : (f[c.k] || ""); });
+      const o = {}; CAMPOS.forEach(c => { if (c.k && !c.extra) o[c.k] = FORMATO[c.k] ? tipoTitulo(f[c.k], FORMATO[c.k]) : (f[c.k] || ""); if (c.noTiene && f[c.k + "_nt"]) { o[c.k] = ""; o[c.k + "_nt"] = true; } });
       o.direccion = tipoTitulo(direccionCompleta(f), "lugar");
       if (o.email) o.email = o.email.toLowerCase();
       return o;
