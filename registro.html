@@ -342,7 +342,7 @@ const CAMPOS = [
   { k:"numeroDocumento", l:"Número Identificación", req:true, re:/^[A-Za-z0-9]{3,20}$/, msg:"Solo números (o letras y números si es pasaporte), sin puntos ni espacios.", modo:"numeric", hint:"Sin puntos ni espacios.", limpiar:/[^A-Za-z0-9]/g },
   { k:"municipioExpedicion", l:"Municipio de Expedición del Documento", municipio:true, hint:"Si el documento es de otro país, elija «Otro»." },
   { k:"genero", l:"Género", req:true, lista:"genero", radio:true, ancho:true },
-  { k:"fechaNacimiento", l:"Fecha de Nacimiento", tipo:"date" },
+  { k:"fechaNacimiento", l:"Fecha de Nacimiento", req:true, tipo:"date" },
   { k:"municipioNacimiento", l:"Municipio de Nacimiento", municipio:true, hint:"Si nació en otro país, elija «Otro»." },
   { sec: "Contacto y residencia" },
   { k:"telefono", l:"Teléfono", re:/^[0-9]{7,10}$/, msg:"Solo números, entre 7 y 10 dígitos.", tipo:"tel", modo:"numeric", hint:"Teléfono fijo (opcional).", limpiar:/[^0-9]/g },
